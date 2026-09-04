@@ -1,0 +1,28 @@
+{
+  "name": "amazon-music-rich-presence",
+  "version": "0.0.0",
+  "description": "A small tool that displays the song currently playing on Amazon Music in Discord Rich Presence.",
+  "homepage": "https://github.com/Robot-Inventor/amazon-music-rich-presence#readme",
+  "bugs": {
+    "url": "https://github.com/Robot-Inventor/amazon-music-rich-presence/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Robot-Inventor/amazon-music-rich-presence.git"
+  },
+  "license": "MIT",
+  "author": "Robot-Inventor",
+  "type": "module",
+  "scripts": {
+    "lint": "eslint \"./src/**/*\"",
+    "format": "prettier --write \"./src/**/*\"",
+    "format:check": "prettier --check \"./src/**/*\""
+  },
+  "devDependencies": {
+    "@robot-inventor/eslint-config": "^13.1.1",
+    "@robot-inventor/tsconfig-base": "^7.1.0",
+    "electrobun": "^2.0.1",
+    "prettier": "^3.9.6",
+    "typescript": "6.0.3"
+  }
+}
