@@ -1,6 +1,7 @@
 import { AMAZON_MUSIC_LAUNCH_ERROR_MESSAGE, type AppRPC, type LaunchAmazonMusicResult } from "../shared/rpc";
 import { BrowserView, BrowserWindow, Updater } from "electrobun/main";
 import { join } from "node:path";
+import { startAmazonMusicPolling } from "./amazonMusic";
 
 const DEV_SERVER_URL = "http://localhost:5173";
 
@@ -44,6 +45,7 @@ const launchAmazonMusic = (): LaunchAmazonMusicResult => {
             stdio: ["ignore", "ignore", "ignore"]
         });
         subprocess.unref();
+        startAmazonMusicPolling();
         return { ok: true };
     } catch {
         return { message: AMAZON_MUSIC_LAUNCH_ERROR_MESSAGE, ok: false };
