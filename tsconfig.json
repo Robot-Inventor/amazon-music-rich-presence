@@ -1,8 +1,12 @@
 {
     "extends": ["./.hutch/devkit/tsconfig.json", "@robot-inventor/tsconfig-base/react-emotion.json"],
     "compilerOptions": {
-        "rootDir": "."
+        "rootDir": ".",
+        "jsx": "react-jsx",
+        "jsxImportSource": null,
+        "types": ["bun"],
+        "ignoreDeprecations": "6.0"
     },
-    "include": ["src/**/*.ts", "electrobun.config.ts"],
+    "include": ["src/**/*.ts", "src/**/*.tsx", "vite.config.ts", "hutch.config.ts", "electrobun.config.ts"],
     "exclude": ["src/**/*.test.ts"]
 }
