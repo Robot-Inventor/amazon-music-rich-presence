@@ -1,4 +1,6 @@
-import { BrowserWindow, Updater } from "electrobun/main";
+import { AMAZON_MUSIC_LAUNCH_ERROR_MESSAGE, type AppRPC, type LaunchAmazonMusicResult } from "../shared/rpc";
+import { BrowserView, BrowserWindow, Updater } from "electrobun/main";
+import { join } from "node:path";
 
 const DEV_SERVER_URL = "http://localhost:5173";
 
@@ -23,11 +25,46 @@ const getMainViewUrl = async (): Promise<string> => {
 
 const url = await getMainViewUrl();
 
+const getAmazonMusicExecutablePath = (): string | null => {
+    if (process.platform !== "win32") {
+        return null;
+    }
+
+    const localAppData = process.env["LOCALAPPDATA"];
+    return localAppData ? join(localAppData, "Amazon Music", "Amazon Music.exe") : null;
+};
+
+const launchAmazonMusic = (): LaunchAmazonMusicResult => {
+    const executablePath = getAmazonMusicExecutablePath();
+    if (!executablePath) return { message: AMAZON_MUSIC_LAUNCH_ERROR_MESSAGE, ok: false };
+
+    try {
+        const subprocess = Bun.spawn([executablePath, "--remote-debugging-port=52856"], {
+            detached: true,
+            stdio: ["ignore", "ignore", "ignore"]
+        });
+        subprocess.unref();
+        return { ok: true };
+    } catch {
+        return { message: AMAZON_MUSIC_LAUNCH_ERROR_MESSAGE, ok: false };
+    }
+};
+
+const rpc = BrowserView.defineRPC<AppRPC>({
+    handlers: {
+        messages: {},
+        requests: {
+            launchAmazonMusic
+        }
+    }
+});
+
 new BrowserWindow({
     frame: {
         height: 600,
         width: 800
     },
+    rpc,
     title: "Amazon Music Rich Presence",
     url
 });
