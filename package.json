@@ -18,7 +18,8 @@
     "format": "prettier --write \"./src/**/*\"",
     "format:check": "prettier --check \"./src/**/*\"",
     "build": "bun run vite build && bunx electrobun build",
-    "dev": "concurrently \"bun run vite --port 5173\" \"bunx electrobun dev\""
+    "dev": "concurrently \"bun run vite --port 5173\" \"bunx electrobun dev\"",
+    "inspect": "bun scripts/inspect.ts"
   },
   "devDependencies": {
     "@robot-inventor/eslint-config": "^13.1.1",
@@ -38,6 +39,7 @@
     "vite": "^8.2.2"
   },
   "dependencies": {
+    "arktype": "^2.2.3",
     "react": "^19.2.8",
     "react-dom": "^19.2.8"
   }
