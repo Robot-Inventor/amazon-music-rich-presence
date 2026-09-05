@@ -1,5 +1,5 @@
+import { type SetActivity, StatusDisplayType } from "@xhayper/discord-rpc";
 import type { PlaybackTimestamps } from "./playback";
-import type { SetActivity } from "@xhayper/discord-rpc";
 import type { TrackInfo } from "./trackInfo";
 
 const DISCORD_ACTIVITY_TYPE_LISTENING = 2;
@@ -25,6 +25,7 @@ const createDiscordActivity = (trackInfo: TrackInfo, playbackTimestamps: Playbac
               startTimestamp: playbackTimestamps.startTimestamp
           }
         : {}),
+    statusDisplayType: StatusDisplayType.DETAILS,
     type: DISCORD_ACTIVITY_TYPE_LISTENING
 });
 
