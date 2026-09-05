@@ -1,13 +1,13 @@
-import { Client, type SetActivity } from "@xhayper/discord-rpc";
-import type { TrackInfo } from "./amazonMusic";
+import { createDiscordActivity, getPresenceKey } from "./discordActivity";
+import { Client } from "@xhayper/discord-rpc";
+import type { PlaybackTimestamps } from "./playback";
+import type { TrackInfo } from "./trackInfo";
+import { withDiscordTimeout } from "./discordRpcUtils";
 
 const DISCORD_RECONNECT_INTERVAL_MS = 5_000;
 const DISCORD_RECONNECT_GRACE_PERIOD_MS = 60_000;
 const DISCORD_LONG_RECONNECT_INTERVAL_MS = 60_000;
-const DISCORD_REQUEST_TIMEOUT_MS = 5_000;
 const DISCORD_APPLICATION_ID = "1545581759796617237";
-const DISCORD_ACTIVITY_TYPE_LISTENING = 2;
-const DISCORD_BUTTON_LABEL = "Listen on Amazon Music";
 const NO_ACTIVE_GENERATION = -1;
 
 type DiscordConnectionState = "connecting" | "connected" | "reconnecting" | "unavailable";
@@ -18,45 +18,11 @@ let discordConnectionState: DiscordConnectionState = "unavailable";
 let discordReconnectStartedAt = 0;
 let discordReconnectTimer: Timer | null = null;
 let lastTrackInfo: TrackInfo | null = null;
+let lastPlaybackTimestamps: PlaybackTimestamps | null = null;
 let lastPublishedTrackKey: string | null = null;
 let discordUpdateQueue = Promise.resolve();
 let discordCleanupPromise = Promise.resolve();
 let discordPresenceErrorReported = false;
-
-const getTrackInfoKey = (trackInfo: TrackInfo | null): string => JSON.stringify(trackInfo);
-
-const toError = (error: unknown): Error => (error instanceof Error ? error : new Error(String(error)));
-
-const withDiscordTimeout = <T>(request: Promise<T>): Promise<T> =>
-    new Promise<T>((resolve, reject) => {
-        const timeout = setTimeout(() => {
-            reject(new Error("Discord RPC request timed out."));
-        }, DISCORD_REQUEST_TIMEOUT_MS);
-        void request.then(
-            (value) => {
-                clearTimeout(timeout);
-                resolve(value);
-            },
-            (error: unknown) => {
-                clearTimeout(timeout);
-                reject(toError(error));
-            }
-        );
-    });
-
-const createDiscordActivity = (trackInfo: TrackInfo): SetActivity => ({
-    details: trackInfo.title,
-    ...(trackInfo.album ? { largeImageText: trackInfo.album } : {}),
-    ...(trackInfo.coverImage ? { largeImageKey: trackInfo.coverImage } : {}),
-    ...(trackInfo.artist ? { state: trackInfo.artist } : {}),
-    ...(trackInfo.link
-        ? {
-              buttons: [{ label: DISCORD_BUTTON_LABEL, url: trackInfo.link }],
-              largeImageUrl: trackInfo.link
-          }
-        : {}),
-    type: DISCORD_ACTIVITY_TYPE_LISTENING
-});
 
 const clearDiscordReconnectTimer = (): void => {
     if (!discordReconnectTimer) return;
@@ -108,12 +74,16 @@ const reconnectDiscordClient = async (client: Client): Promise<boolean> => {
     }
 };
 
-const sendDiscordPresence = async (client: Client, trackInfo: TrackInfo | null): Promise<boolean> => {
+const sendDiscordPresence = async (
+    client: Client,
+    trackInfo: TrackInfo | null,
+    playbackTimestamps: PlaybackTimestamps | null
+): Promise<boolean> => {
     if (!client.user) return false;
 
     try {
         if (trackInfo) {
-            await withDiscordTimeout(client.user.setActivity(createDiscordActivity(trackInfo)));
+            await withDiscordTimeout(client.user.setActivity(createDiscordActivity(trackInfo, playbackTimestamps)));
         } else {
             await withDiscordTimeout(client.user.clearActivity());
         }
@@ -129,23 +99,37 @@ const recordPublishedTrack = (client: Client, generation: number, trackInfoKey: 
     if (isActiveGeneration(generation) && discordClient === client) lastPublishedTrackKey = trackInfoKey;
 };
 
-const updateDiscordPresence = async (trackInfo: TrackInfo | null, generation: number, force = false): Promise<void> => {
+interface PresenceUpdate {
+    readonly force?: boolean;
+    readonly generation: number;
+    readonly playbackTimestamps: PlaybackTimestamps | null;
+    readonly trackInfo: TrackInfo | null;
+}
+
+const updateDiscordPresence = async ({
+    force = false,
+    generation,
+    playbackTimestamps,
+    trackInfo
+}: PresenceUpdate): Promise<void> => {
     if (!isActiveGeneration(generation)) return;
-    const trackInfoKey = getTrackInfoKey(trackInfo);
+    const trackInfoKey = getPresenceKey(trackInfo, playbackTimestamps);
     if (!force && trackInfoKey === lastPublishedTrackKey) return;
 
     const client = discordClient;
     if (!client || discordConnectionState !== "connected") return;
 
-    if (await sendDiscordPresence(client, trackInfo)) recordPublishedTrack(client, generation, trackInfoKey);
+    if (await sendDiscordPresence(client, trackInfo, playbackTimestamps)) {
+        recordPublishedTrack(client, generation, trackInfoKey);
+    }
 };
 
-const queueDiscordPresence = (trackInfo: TrackInfo | null, generation: number, force = false): void => {
+const queueDiscordPresence = (presenceUpdate: PresenceUpdate): void => {
+    const { generation, playbackTimestamps, trackInfo } = presenceUpdate;
     if (!isActiveGeneration(generation)) return;
     lastTrackInfo = trackInfo;
-    discordUpdateQueue = discordUpdateQueue
-        .then(() => updateDiscordPresence(trackInfo, generation, force))
-        .catch(ignoreError);
+    lastPlaybackTimestamps = playbackTimestamps;
+    discordUpdateQueue = discordUpdateQueue.then(() => updateDiscordPresence(presenceUpdate)).catch(ignoreError);
 };
 
 const markDiscordConnected = (generation: number, message: string | null): void => {
@@ -155,7 +139,12 @@ const markDiscordConnected = (generation: number, message: string | null): void 
         // eslint-disable-next-line no-console
         console.info(message);
     }
-    queueDiscordPresence(lastTrackInfo, generation, true);
+    queueDiscordPresence({
+        force: true,
+        generation,
+        playbackTimestamps: lastPlaybackTimestamps,
+        trackInfo: lastTrackInfo
+    });
 };
 
 const scheduleDiscordReconnect = (generation: number, delay: number, reconnect: () => Promise<void>): void => {
@@ -272,6 +261,7 @@ const resetDiscordState = (): void => {
     discordClient = null;
     discordConnectionState = "unavailable";
     lastTrackInfo = null;
+    lastPlaybackTimestamps = null;
     lastPublishedTrackKey = null;
     discordPresenceErrorReported = false;
     discordUpdateQueue = Promise.resolve();
@@ -288,8 +278,12 @@ const stopDiscordRpc = (): void => {
     }
 };
 
-const publishTrackInfo = (trackInfo: TrackInfo | null, generation: number): void => {
-    queueDiscordPresence(trackInfo, generation);
+const publishTrackInfo = (
+    trackInfo: TrackInfo | null,
+    playbackTimestamps: PlaybackTimestamps | null,
+    generation: number
+): void => {
+    queueDiscordPresence({ generation, playbackTimestamps, trackInfo });
 };
 
 export { publishTrackInfo, startDiscordRpc, stopDiscordRpc };

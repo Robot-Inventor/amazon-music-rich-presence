@@ -1,13 +1,13 @@
 import { CDP_CONNECT_TIMEOUT_MS, type CdpClient, CdpDisconnectedError, createCdpClient } from "./cdp";
 import { type DebugTarget, getAmazonMusicTarget } from "./cdpTargets";
+import { extractTrackInfo, getTrackInfoKey } from "./trackInfo";
+import { getPlaybackTimestamps, resetPlaybackSyncState } from "./playback";
 import { publishTrackInfo, startDiscordRpc, stopDiscordRpc } from "./discordRpc";
-import { type } from "arktype";
 
 const POLL_INTERVAL_MS = 5_000;
 const TARGET_RETRY_INTERVAL_MS = 1_000;
 const TARGET_WAIT_TIMEOUT_MS = 30_000;
 const NO_DELAY_MS = 0;
-const AMAZON_MUSIC_LINK_BASE = "https://music.amazon.co.jp/albums";
 
 type PollingFunction = (state: PollingState) => Promise<void>;
 
@@ -23,52 +23,6 @@ interface PollingState {
     readonly target: DebugTarget;
 }
 
-const parseTrackInfo = type({
-    album: "string | null",
-    artist: "string | null",
-    coverImage: "string | null",
-    link: "string | null",
-    title: "string"
-});
-
-type TrackInfo = typeof parseTrackInfo.infer;
-const extractTrackInfo = async (client: CdpClient): Promise<TrackInfo | null> => {
-    const value = await client.evaluate(`
-        (() => {
-            const getText = (selectors) => {
-                for (const selector of selectors) {
-                    const element = document.querySelector(selector);
-                    const text = element && (element.textContent || '').trim();
-                    if (text) return text;
-                }
-                return null;
-            };
-            const imageElement = document.querySelector('.trackMetadataWrapper .artImage') || document.querySelector('.artwork .artImage');
-            const imageUrl = imageElement && (imageElement.currentSrc || imageElement.getAttribute('src'));
-            const transport = document.querySelector('#transportContainer');
-            const transportVue = transport && transport.__vue__;
-            const track = transportVue && transportVue.track;
-            const trackAsin = track && typeof track.asin === 'string' ? track.asin : null;
-            const albumAsin = track && track.album && typeof track.album.asin === 'string' ? track.album.asin : null;
-            const link = trackAsin && albumAsin
-                ? '${AMAZON_MUSIC_LINK_BASE}/' + encodeURIComponent(albumAsin) + '?trackAsin=' + encodeURIComponent(trackAsin)
-                : null;
-            const title = getText(['.trackMetadata .title', '.trackTitle']);
-            if (!title) return null;
-            return {
-                title: title,
-                artist: getText(['.trackMetadata .secondaryInnerText:first-child']),
-                album: getText(['.trackMetadata .secondaryInnerText:last-child']),
-                coverImage: typeof imageUrl === 'string' && imageUrl ? imageUrl : null,
-                link: link
-            };
-        })()
-    `);
-
-    const trackInfo = parseTrackInfo(value);
-    return trackInfo instanceof type.errors ? null : trackInfo;
-};
-
 const wait = async (milliseconds: number): Promise<void> => {
     await new Promise<void>((resolve) => {
         setTimeout(resolve, milliseconds);
@@ -80,6 +34,7 @@ let activeClient: CdpClient | null = null;
 
 const stopAmazonMusicPolling = (): void => {
     ++pollingGeneration;
+    resetPlaybackSyncState();
     activeClient?.close();
     activeClient = null;
     stopDiscordRpc();
@@ -178,8 +133,18 @@ const recoverCdpClient = async (
 };
 
 const updateCurrentTrack = async (client: CdpClient, generation: number): Promise<void> => {
-    const trackInfo = await extractTrackInfo(client);
-    publishTrackInfo(trackInfo, generation);
+    const trackSnapshot = await extractTrackInfo(client);
+    if (!trackSnapshot) {
+        resetPlaybackSyncState();
+        publishTrackInfo(null, null, generation);
+        return;
+    }
+
+    publishTrackInfo(
+        trackSnapshot.trackInfo,
+        getPlaybackTimestamps(getTrackInfoKey(trackSnapshot.trackInfo), trackSnapshot.playback),
+        generation
+    );
 };
 
 const handlePollingError = (generation: number, error: unknown): void => {
@@ -202,7 +167,7 @@ const scheduleAfterDisconnect = async (state: PollingState, poll: PollingFunctio
     const replacementClient = await recoverCdpClient(state.client, state.target, state.generation);
 
     if (!replacementClient || state.generation !== pollingGeneration) {
-        publishTrackInfo(null, state.generation);
+        publishTrackInfo(null, null, state.generation);
         replacementClient?.close();
         return;
     }
@@ -297,4 +262,3 @@ const startAmazonMusicPolling = (): void => {
 };
 
 export { startAmazonMusicPolling, stopAmazonMusicPolling };
-export type { TrackInfo };
