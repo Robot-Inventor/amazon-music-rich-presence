@@ -120,6 +120,11 @@ const tray = new Tray({ title: "Amazon Music Rich Presence" });
 
 tray.setMenu([
     {
+        action: "show-window",
+        label: "Show Amazon Music Rich Presence",
+        type: "normal"
+    },
+    {
         action: "launch-amazon-music",
         label: "Launch Amazon Music",
         type: "normal"
@@ -134,6 +139,7 @@ tray.setMenu([
 
 tray.on("tray-clicked", (event) => {
     const action = getTrayAction(event);
+    if (action === "show-window") win.show();
     if (action === "launch-amazon-music") launchAmazonMusic();
     if (action === "quit") Utils.quit();
 });
