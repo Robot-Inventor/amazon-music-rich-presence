@@ -1,6 +1,6 @@
 import { createDiscordActivity, getPresenceKey } from "./discordActivity";
 import { Client } from "@xhayper/discord-rpc";
-import type { PlaybackTimestamps } from "./playback";
+import type { PlaybackTimestamps } from "../shared/playback";
 import type { TrackInfo } from "./trackInfo";
 import { withDiscordTimeout } from "./discordRpcUtils";
 

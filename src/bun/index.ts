@@ -1,5 +1,12 @@
-import { AMAZON_MUSIC_LAUNCH_ERROR_MESSAGE, type AppRPC, type LaunchAmazonMusicResult } from "../shared/rpc";
+import {
+    AMAZON_MUSIC_LAUNCH_ERROR_MESSAGE,
+    type AppRPC,
+    type CurrentTrackUpdate,
+    type LaunchAmazonMusicResult,
+    type OpenAmazonMusicParams
+} from "../shared/rpc";
 import { BrowserView, BrowserWindow, Tray, Updater, Utils } from "electrobun/main";
+import { buildAmazonMusicAlbumUrl } from "../utils/amazonMusicUrl";
 import { join } from "node:path";
 import { startAmazonMusicPolling } from "./amazonMusic";
 import { tmpdir } from "node:os";
@@ -39,6 +46,10 @@ const getAmazonMusicExecutablePath = (): string | null => {
     return localAppData ? join(localAppData, "Amazon Music", "Amazon Music.exe") : null;
 };
 
+let publishCurrentTrackToView: (update: CurrentTrackUpdate) => void = (): void => {
+    throw new Error("The current track publisher is not initialized.");
+};
+
 const launchAmazonMusic = (): LaunchAmazonMusicResult => {
     const executablePath = getAmazonMusicExecutablePath();
     if (!executablePath) return { message: AMAZON_MUSIC_LAUNCH_ERROR_MESSAGE, ok: false };
@@ -50,11 +61,15 @@ const launchAmazonMusic = (): LaunchAmazonMusicResult => {
             stdio: ["ignore", "ignore", "ignore"]
         });
         subprocess.unref();
-        startAmazonMusicPolling();
+        startAmazonMusicPolling(publishCurrentTrackToView);
         return { ok: true };
     } catch {
         return { message: AMAZON_MUSIC_LAUNCH_ERROR_MESSAGE, ok: false };
     }
+};
+
+const openAmazonMusic = ({ albumId, trackId }: OpenAmazonMusicParams): undefined => {
+    Utils.openExternal(buildAmazonMusicAlbumUrl(albumId, trackId));
 };
 
 const getTrayAction = (event: unknown): string | null => {
@@ -66,7 +81,8 @@ const rpc = BrowserView.defineRPC<AppRPC>({
     handlers: {
         messages: {},
         requests: {
-            launchAmazonMusic
+            launchAmazonMusic,
+            openAmazonMusic
         }
     }
 });
@@ -80,6 +96,10 @@ const win = new BrowserWindow({
     title: "Amazon Music Rich Presence",
     url
 });
+
+publishCurrentTrackToView = (update: CurrentTrackUpdate): void => {
+    win.webview.rpc?.send.currentTrack(update);
+};
 
 win.on("will-close", (event) => {
     const parsedEvent = parseWindowCloseEvent(event);

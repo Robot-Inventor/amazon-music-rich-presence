@@ -22,6 +22,7 @@
     "inspect": "bun scripts/inspect.ts"
   },
   "devDependencies": {
+    "@base-ui/react": "^1.8.0",
     "@robot-inventor/eslint-config": "^13.1.1",
     "@robot-inventor/tsconfig-base": "^7.1.0",
     "@types/bun": "^1.4.1",
@@ -34,6 +35,7 @@
     "devtools-protocol": "^0.0.1692173",
     "electrobun": "^2.0.1",
     "jiti": "^2.7.0",
+    "lucide-react": "^1.41.0",
     "prettier": "^3.9.6",
     "the-new-css-reset": "^1.11.3",
     "typescript": "6.0.3",

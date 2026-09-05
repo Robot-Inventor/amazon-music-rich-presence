@@ -1,23 +1,13 @@
+import { type TrackInfo, parseTrackInfo } from "../shared/trackInfo";
 import type { CdpClient } from "./cdp";
 import { parsePlaybackSnapshot } from "./playback";
 import { type } from "arktype";
-
-const AMAZON_MUSIC_LINK_BASE = "https://music.amazon.co.jp/albums";
-
-const parseTrackInfo = type({
-    album: "string | null",
-    artist: "string | null",
-    coverImage: "string | null",
-    link: "string | null",
-    title: "string"
-});
 
 const parseTrackSnapshot = type({
     playback: parsePlaybackSnapshot,
     trackInfo: parseTrackInfo
 });
 
-type TrackInfo = typeof parseTrackInfo.infer;
 type TrackSnapshot = typeof parseTrackSnapshot.infer;
 
 const getTrackInfoKey = (trackInfo: TrackInfo): string => JSON.stringify(trackInfo);
@@ -43,9 +33,6 @@ const extractTrackInfo = async (client: CdpClient): Promise<TrackSnapshot | null
             const track = transportVue && transportVue.track;
             const trackAsin = track && typeof track.asin === 'string' ? track.asin : null;
             const albumAsin = track && track.album && typeof track.album.asin === 'string' ? track.album.asin : null;
-            const link = trackAsin && albumAsin
-                ? '${AMAZON_MUSIC_LINK_BASE}/' + encodeURIComponent(albumAsin) + '?trackAsin=' + encodeURIComponent(trackAsin)
-                : null;
             const title = getText(['.trackMetadata .title', '.trackTitle']);
             if (!title) return null;
             return {
@@ -60,9 +47,10 @@ const extractTrackInfo = async (client: CdpClient): Promise<TrackSnapshot | null
                 },
                 trackInfo: {
                     album: getText(['.trackMetadata .secondaryInnerText:last-child']),
+                    albumId: albumAsin,
                     artist: getText(['.trackMetadata .secondaryInnerText:first-child']),
                     coverImage: typeof imageUrl === 'string' && imageUrl ? imageUrl : null,
-                    link: link,
+                    trackId: trackAsin,
                     title: title
                 }
             };

@@ -1,9 +1,13 @@
 import { style } from "@vanilla-extract/css";
 
-const mainViewStyles = style({
-    background: "#111",
-    color: "#fff",
-    minHeight: "100vh"
+const appNameStyles = style({
+    fontSize: "1.5rem",
+    fontWeight: "bold",
+    textAlign: "center"
 });
 
-export { mainViewStyles };
+const launcherStyles = style({
+    margin: "2rem auto"
+});
+
+export { appNameStyles, launcherStyles };

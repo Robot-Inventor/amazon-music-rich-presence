@@ -1,3 +1,4 @@
+import type { PlaybackTimestamps } from "../shared/playback";
 import { type } from "arktype";
 
 const MILLISECONDS_PER_SECOND = 1_000;
@@ -15,11 +16,6 @@ const parsePlaybackSnapshot = type({
 const parsePlaybackPositionInput = type("x/^(?<sign>-)?(?<first>\\d+):(?<second>[0-5]\\d)(?::(?<third>[0-5]\\d))?$/");
 
 type PlaybackSnapshot = typeof parsePlaybackSnapshot.infer;
-
-interface PlaybackTimestamps {
-    readonly endTimestamp: number;
-    readonly startTimestamp: number;
-}
 
 interface PlaybackSyncState extends PlaybackTimestamps {
     readonly trackKey: string;
@@ -111,13 +107,12 @@ const getPlaybackTimestamps = (trackKey: string, playback: PlaybackSnapshot): Pl
         };
     }
 
-    return playbackSyncState;
+    return playbackSyncState
+        ? {
+              endTimestamp: playbackSyncState.endTimestamp,
+              startTimestamp: playbackSyncState.startTimestamp
+          }
+        : null;
 };
 
-export {
-    getPlaybackTimestamps,
-    parsePlaybackSnapshot,
-    resetPlaybackSyncState,
-    type PlaybackSnapshot,
-    type PlaybackTimestamps
-};
+export { getPlaybackTimestamps, parsePlaybackSnapshot, resetPlaybackSyncState, type PlaybackSnapshot };
