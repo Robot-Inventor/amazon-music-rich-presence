@@ -1,12 +1,12 @@
 import type { LaunchAmazonMusicResult } from "../../shared/rpc";
 import type { ReactNode } from "react";
-import { buttonStyles } from "./OpenAmazonMusic.css";
+import { buttonStyles } from "./LaunchAmazonMusic.css";
 
 interface OpenAmazonMusicProps {
     onLaunch: () => Promise<LaunchAmazonMusicResult>;
 }
 
-const OpenAmazonMusic = ({ onLaunch }: OpenAmazonMusicProps): ReactNode => {
+const LaunchAmazonMusic = ({ onLaunch }: OpenAmazonMusicProps): ReactNode => {
     const handleClick = (): void => {
         void (async (): Promise<void> => {
             const result = await onLaunch();
@@ -19,9 +19,9 @@ const OpenAmazonMusic = ({ onLaunch }: OpenAmazonMusicProps): ReactNode => {
 
     return (
         <button className={buttonStyles} onClick={handleClick} type="button">
-            Open Amazon Music
+            Launch Amazon Music
         </button>
     );
 };
 
-export { OpenAmazonMusic };
+export { LaunchAmazonMusic };

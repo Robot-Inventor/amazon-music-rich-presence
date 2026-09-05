@@ -2,7 +2,7 @@
 import "the-new-css-reset/css/reset.css";
 import type { AppRPC } from "../shared/rpc";
 import { Electroview } from "electrobun/view";
-import { OpenAmazonMusic } from "./components/OpenAmazonMusic";
+import { LaunchAmazonMusic } from "./components/LaunchAmazonMusic";
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 import { mainViewStyles } from "./index.css";
@@ -26,7 +26,7 @@ createRoot(rootElement).render(
     <StrictMode>
         <main className={mainViewStyles}>
             <h1>Amazon Music Rich Presence</h1>
-            <OpenAmazonMusic onLaunch={() => rpc.request.launchAmazonMusic({})} />
+            <LaunchAmazonMusic onLaunch={() => rpc.request.launchAmazonMusic({})} />
         </main>
     </StrictMode>
 );

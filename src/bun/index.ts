@@ -1,9 +1,12 @@
 import { AMAZON_MUSIC_LAUNCH_ERROR_MESSAGE, type AppRPC, type LaunchAmazonMusicResult } from "../shared/rpc";
-import { BrowserView, BrowserWindow, Updater } from "electrobun/main";
+import { BrowserView, BrowserWindow, Tray, Updater, Utils } from "electrobun/main";
 import { join } from "node:path";
 import { startAmazonMusicPolling } from "./amazonMusic";
+import { type } from "arktype";
 
 const DEV_SERVER_URL = "http://localhost:5173";
+const parseTrayClickedEvent = type({ data: { action: "string" } });
+const parseWindowCloseEvent = type({ response: "unknown" });
 
 /**
  * Returns the Vite URL during development and the bundled view otherwise.
@@ -52,6 +55,11 @@ const launchAmazonMusic = (): LaunchAmazonMusicResult => {
     }
 };
 
+const getTrayAction = (event: unknown): string | null => {
+    const parsedEvent = parseTrayClickedEvent(event);
+    return parsedEvent instanceof type.errors ? null : parsedEvent.data.action;
+};
+
 const rpc = BrowserView.defineRPC<AppRPC>({
     handlers: {
         messages: {},
@@ -61,7 +69,7 @@ const rpc = BrowserView.defineRPC<AppRPC>({
     }
 });
 
-new BrowserWindow({
+const win = new BrowserWindow({
     frame: {
         height: 600,
         width: 800
@@ -69,4 +77,34 @@ new BrowserWindow({
     rpc,
     title: "Amazon Music Rich Presence",
     url
+});
+
+win.on("will-close", (event) => {
+    const parsedEvent = parseWindowCloseEvent(event);
+    if (parsedEvent instanceof type.errors) return;
+
+    parsedEvent.response = { allow: false };
+    win.hide();
+});
+
+const tray = new Tray({ title: "Amazon Music Rich Presence" });
+
+tray.setMenu([
+    {
+        action: "launch-amazon-music",
+        label: "Launch Amazon Music",
+        type: "normal"
+    },
+    { type: "separator" },
+    {
+        action: "quit",
+        label: "Quit",
+        type: "normal"
+    }
+]);
+
+tray.on("tray-clicked", (event) => {
+    const action = getTrayAction(event);
+    if (action === "launch-amazon-music") launchAmazonMusic();
+    if (action === "quit") Utils.quit();
 });
