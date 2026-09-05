@@ -9,9 +9,24 @@ import type { CurrentTrackUpdate } from "../shared/rpc";
 const POLL_INTERVAL_MS = 5_000;
 const TARGET_RETRY_INTERVAL_MS = 1_000;
 const TARGET_WAIT_TIMEOUT_MS = 30_000;
+const MILLISECONDS_PER_SECOND = 1_000;
 const NO_DELAY_MS = 0;
 
 type PollingFunction = (state: PollingState) => Promise<void>;
+
+interface AmazonMusicPollingOptions {
+    readonly shouldLogStartupFailure?: boolean;
+    readonly startDiscordBeforeTargetSearch?: boolean;
+    readonly targetWaitTimeoutMs?: number;
+}
+
+interface PollingRunOptions {
+    readonly generation: number;
+    readonly publishCurrentTrack: (update: CurrentTrackUpdate) => void;
+    readonly shouldLogStartupFailure: boolean;
+    readonly startDiscordBeforeTargetSearch: boolean;
+    readonly targetWaitTimeoutMs: number;
+}
 
 interface TargetSearchResult {
     readonly deadline: number;
@@ -30,6 +45,13 @@ const wait = async (milliseconds: number): Promise<void> => {
     await new Promise<void>((resolve) => {
         setTimeout(resolve, milliseconds);
     });
+};
+
+const waitForNextTargetSearch = async (retryStartedAt: number, deadline: number): Promise<void> => {
+    const retryTime = Math.min(TARGET_RETRY_INTERVAL_MS, Math.max(NO_DELAY_MS, deadline - Date.now()));
+    const elapsedTime = Date.now() - retryStartedAt;
+    const waitTime = Math.max(NO_DELAY_MS, retryTime - elapsedTime);
+    if (waitTime > NO_DELAY_MS) await wait(waitTime);
 };
 
 const publishNoTrackUpdate = (generation: number, publishCurrentTrack: (update: CurrentTrackUpdate) => void): void => {
@@ -51,12 +73,16 @@ const stopAmazonMusicPolling = (): void => {
     publishCurrentTrackToView?.({ kind: "no-track" });
 };
 
-const findTargetAfterLaunch = async (generation: number): Promise<TargetSearchResult | null> => {
-    const deadline = Date.now() + TARGET_WAIT_TIMEOUT_MS;
+const findTargetAfterLaunch = async (
+    generation: number,
+    targetWaitTimeoutMs: number
+): Promise<TargetSearchResult | null> => {
+    const deadline = Date.now() + targetWaitTimeoutMs;
 
     const findTarget = async (): Promise<DebugTarget | null> => {
         if (generation !== pollingGeneration || Date.now() >= deadline) return null;
 
+        const retryStartedAt = Date.now();
         const remainingTime = deadline - Date.now();
 
         try {
@@ -66,10 +92,7 @@ const findTargetAfterLaunch = async (generation: number): Promise<TargetSearchRe
             // Amazon Music may not have opened its remote debugging endpoint yet.
         }
 
-        const retryTime = Math.min(TARGET_RETRY_INTERVAL_MS, Math.max(NO_DELAY_MS, deadline - Date.now()));
-        if (!(retryTime > NO_DELAY_MS)) return null;
-
-        await wait(retryTime);
+        await waitForNextTargetSearch(retryStartedAt, deadline);
 
         return findTarget();
     };
@@ -234,7 +257,7 @@ const activateClient = (client: CdpClient, generation: number): boolean => {
     return true;
 };
 
-const reportStartupFailure = (generation: number, message: string): void => {
+const logStartupFailure = (generation: number, message: string): void => {
     if (generation !== pollingGeneration) return;
     // eslint-disable-next-line no-console
     console.error(message);
@@ -245,22 +268,37 @@ const pollWithClient = (state: PollingState): void => {
     schedulePoll(state, pollAmazonMusic);
 };
 
-const stopAfterStartupFailure = (generation: number, message: string): void => {
-    reportStartupFailure(generation, message);
+const stopAfterStartupFailure = (generation: number, message: string, reportFailure: boolean): void => {
+    if (reportFailure) logStartupFailure(generation, message);
     if (generation === pollingGeneration) stopAmazonMusicPolling();
 };
 
 const connectAndPoll = async (
     searchResult: TargetSearchResult,
-    generation: number,
-    publishCurrentTrack: (update: CurrentTrackUpdate) => void
+    {
+        generation,
+        publishCurrentTrack,
+        shouldLogStartupFailure,
+        startDiscordBeforeTargetSearch,
+        targetWaitTimeoutMs
+    }: PollingRunOptions
 ): Promise<void> => {
     const client = await connectAfterLaunch(searchResult.target, generation, searchResult.deadline);
     if (!client) {
-        stopAfterStartupFailure(generation, "Could not connect to the Amazon Music page within 30 seconds.");
+        stopAfterStartupFailure(
+            generation,
+            `Could not connect to the Amazon Music page within ${String(targetWaitTimeoutMs / MILLISECONDS_PER_SECOND)} seconds.`,
+            shouldLogStartupFailure
+        );
         return;
     }
 
+    if (generation !== pollingGeneration) {
+        client.close();
+        return;
+    }
+
+    if (!startDiscordBeforeTargetSearch) startDiscordRpc(generation);
     pollWithClient({
         client,
         generation,
@@ -270,33 +308,61 @@ const connectAndPoll = async (
     });
 };
 
-const runAmazonMusicPolling = async (
-    generation: number,
-    publishCurrentTrack: (update: CurrentTrackUpdate) => void
-): Promise<void> => {
-    const searchResult = await findTargetAfterLaunch(generation);
+const runAmazonMusicPolling = async ({
+    generation,
+    publishCurrentTrack,
+    shouldLogStartupFailure,
+    startDiscordBeforeTargetSearch,
+    targetWaitTimeoutMs
+}: PollingRunOptions): Promise<void> => {
+    const searchResult = await findTargetAfterLaunch(generation, targetWaitTimeoutMs);
     if (!searchResult) {
-        stopAfterStartupFailure(generation, "Could not find the Amazon Music page target within 30 seconds.");
+        stopAfterStartupFailure(
+            generation,
+            `Could not find the Amazon Music page target within ${String(targetWaitTimeoutMs / MILLISECONDS_PER_SECOND)} seconds.`,
+            shouldLogStartupFailure
+        );
         return;
     }
     if (generation !== pollingGeneration) {
         return;
     }
 
-    await connectAndPoll(searchResult, generation, publishCurrentTrack);
+    await connectAndPoll(searchResult, {
+        generation,
+        publishCurrentTrack,
+        shouldLogStartupFailure,
+        startDiscordBeforeTargetSearch,
+        targetWaitTimeoutMs
+    });
 };
 
-const startAmazonMusicPolling = (publishCurrentTrack: (update: CurrentTrackUpdate) => void): void => {
+const startAmazonMusicPolling = (
+    publishCurrentTrack: (update: CurrentTrackUpdate) => void,
+    {
+        shouldLogStartupFailure = true,
+        startDiscordBeforeTargetSearch = true,
+        targetWaitTimeoutMs = TARGET_WAIT_TIMEOUT_MS
+    }: AmazonMusicPollingOptions = {}
+): void => {
     publishCurrentTrackToView = publishCurrentTrack;
     stopAmazonMusicPolling();
 
     const generation = pollingGeneration;
 
-    startDiscordRpc(generation);
-    void runAmazonMusicPolling(generation, publishCurrentTrack).catch((error: unknown) => {
+    if (startDiscordBeforeTargetSearch) startDiscordRpc(generation);
+    void runAmazonMusicPolling({
+        generation,
+        publishCurrentTrack,
+        shouldLogStartupFailure,
+        startDiscordBeforeTargetSearch,
+        targetWaitTimeoutMs
+    }).catch((error: unknown) => {
         if (generation === pollingGeneration) {
-            // eslint-disable-next-line no-console
-            console.error("Amazon Music polling stopped.", error);
+            if (shouldLogStartupFailure) {
+                // eslint-disable-next-line no-console
+                console.error("Amazon Music polling stopped.", error);
+            }
             stopAmazonMusicPolling();
         }
     });

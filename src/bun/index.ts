@@ -13,6 +13,7 @@ import { tmpdir } from "node:os";
 import { type } from "arktype";
 
 const DEV_SERVER_URL = "http://localhost:5173";
+const STARTUP_TARGET_WAIT_TIMEOUT_MS = 5_000;
 const parseTrayClickedEvent = type({ data: { action: "string" } });
 const parseWindowCloseEvent = type({ response: "unknown" });
 
@@ -100,6 +101,12 @@ const win = new BrowserWindow({
 publishCurrentTrackToView = (update: CurrentTrackUpdate): void => {
     win.webview.rpc?.send.currentTrack(update);
 };
+
+startAmazonMusicPolling(publishCurrentTrackToView, {
+    shouldLogStartupFailure: false,
+    startDiscordBeforeTargetSearch: false,
+    targetWaitTimeoutMs: STARTUP_TARGET_WAIT_TIMEOUT_MS
+});
 
 win.on("will-close", (event) => {
     const parsedEvent = parseWindowCloseEvent(event);
