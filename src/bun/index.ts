@@ -2,6 +2,7 @@ import { AMAZON_MUSIC_LAUNCH_ERROR_MESSAGE, type AppRPC, type LaunchAmazonMusicR
 import { BrowserView, BrowserWindow, Tray, Updater, Utils } from "electrobun/main";
 import { join } from "node:path";
 import { startAmazonMusicPolling } from "./amazonMusic";
+import { tmpdir } from "node:os";
 import { type } from "arktype";
 
 const DEV_SERVER_URL = "http://localhost:5173";
@@ -44,6 +45,7 @@ const launchAmazonMusic = (): LaunchAmazonMusicResult => {
 
     try {
         const subprocess = Bun.spawn([executablePath, "--remote-debugging-port=52856"], {
+            cwd: tmpdir(),
             detached: true,
             stdio: ["ignore", "ignore", "ignore"]
         });
