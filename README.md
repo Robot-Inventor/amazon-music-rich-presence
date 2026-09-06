@@ -1,5 +1,9 @@
 # Amazon Music Rich Presence
 
+<p align="center">
+  <img src="./assets/logo.png" alt="logo" width="100"/>
+</p>
+
 > [!IMPORTANT]
 > This is an unofficial community project completely unrelated to Amazon or Discord.
 
