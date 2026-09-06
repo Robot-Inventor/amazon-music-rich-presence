@@ -17,7 +17,7 @@
     "lint": "eslint \"./src/**/*\"",
     "format": "prettier --write \"./src/**/*\"",
     "format:check": "prettier --check \"./src/**/*\"",
-    "build": "bun run vite build && bunx electrobun build",
+    "build": "bun run vite build && bunx electrobun build --env=stable",
     "dev": "concurrently \"bun run vite --port 5173\" \"bunx electrobun dev\"",
     "inspect": "bun scripts/inspect.ts"
   },
