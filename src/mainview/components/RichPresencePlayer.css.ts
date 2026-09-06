@@ -1,13 +1,21 @@
 import { style } from "@vanilla-extract/css";
+import { vars } from "../theme.css";
 
 const containerStyles = style({
-    background: "#222",
+    background: vars.color.surface,
     borderRadius: "0.5rem",
     display: "grid",
     gap: "0 1rem",
     gridTemplateColumns: "auto minmax(0, 1fr)",
     gridTemplateRows: "auto auto auto",
     padding: "1rem",
+
+    selectors: {
+        "a &:hover": {
+            background: vars.color.surfaceContainer
+        }
+    },
+
     width: "450px"
 });
 
@@ -33,7 +41,7 @@ const titleStyles = style({
 });
 
 const artistStyles = style({
-    color: "#aaa",
+    color: vars.color.onBackgroundVariant,
     gridColumn: "2 / 3",
     gridRow: "2 / 3",
     minWidth: 0,
@@ -67,14 +75,14 @@ const progressLabelStyles = style({
 });
 
 const progressTrackStyles = style({
-    background: "#444",
+    background: vars.color.onBackgroundVariant,
     borderRadius: "2px",
     height: "2px",
     overflow: "hidden"
 });
 
 const progressIndicatorStyles = style({
-    background: "#fff",
+    background: vars.color.onBackground,
     height: "100%"
 });
 

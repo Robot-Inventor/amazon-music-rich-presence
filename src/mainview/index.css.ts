@@ -1,4 +1,16 @@
 import { style } from "@vanilla-extract/css";
+import { vars } from "./theme.css";
+
+const mainStyles = style({
+    alignItems: "center",
+    background: vars.color.background,
+    color: vars.color.onBackground,
+    display: "flex",
+    flexDirection: "column",
+    height: "100vh",
+    justifyContent: "center",
+    width: "100%"
+});
 
 const appNameStyles = style({
     fontSize: "1.5rem",
@@ -10,4 +22,4 @@ const launcherStyles = style({
     margin: "2rem auto"
 });
 
-export { appNameStyles, launcherStyles };
+export { mainStyles, appNameStyles, launcherStyles };
