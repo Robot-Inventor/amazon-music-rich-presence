@@ -1,7 +1,7 @@
 import { type SetActivity, StatusDisplayType } from "@xhayper/discord-rpc";
 import type { PlaybackTimestamps } from "../shared/playback";
 import type { TrackInfo } from "../shared/trackInfo";
-import { buildAmazonMusicAlbumUrl } from "../utils/amazonMusicUrl";
+import { buildRegionNeutralAmazonMusicAlbumUrl } from "../utils/amazonMusicUrl";
 
 const DISCORD_ACTIVITY_TYPE_LISTENING = 2;
 const DISCORD_BUTTON_LABEL = "Listen on Amazon Music";
@@ -12,25 +12,18 @@ const getPresenceKey = (
     playbackTimestamps: PlaybackTimestamps | null
 ): string => JSON.stringify({ amazonMusicHostname, playbackTimestamps, trackInfo });
 
-const createDiscordActivity = (
-    amazonMusicHostname: string,
-    trackInfo: TrackInfo,
-    playbackTimestamps: PlaybackTimestamps | null
-): SetActivity => {
-    const amazonMusicUrl =
-        trackInfo.albumId && trackInfo.trackId
-            ? buildAmazonMusicAlbumUrl(amazonMusicHostname, trackInfo.albumId, trackInfo.trackId)
-            : null;
+const createDiscordActivity = (trackInfo: TrackInfo, playbackTimestamps: PlaybackTimestamps | null): SetActivity => {
+    const amazonMusicUrls = trackInfo.trackId ? buildRegionNeutralAmazonMusicAlbumUrl(trackInfo.trackId) : null;
 
     return {
         details: trackInfo.title,
         ...(trackInfo.album ? { largeImageText: trackInfo.album } : {}),
         ...(trackInfo.coverImage ? { largeImageKey: trackInfo.coverImage } : {}),
         ...(trackInfo.artist ? { state: trackInfo.artist } : {}),
-        ...(amazonMusicUrl
+        ...(amazonMusicUrls
             ? {
-                  buttons: [{ label: DISCORD_BUTTON_LABEL, url: amazonMusicUrl }],
-                  largeImageUrl: amazonMusicUrl
+                  buttons: [{ label: DISCORD_BUTTON_LABEL, url: amazonMusicUrls.long }],
+                  largeImageUrl: amazonMusicUrls.short
               }
             : {}),
         ...(playbackTimestamps

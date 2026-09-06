@@ -85,9 +85,7 @@ const sendDiscordPresence = async (client: Client, presence: PresenceData): Prom
 
     try {
         if (trackInfo && amazonMusicHostname) {
-            await withDiscordTimeout(
-                client.user.setActivity(createDiscordActivity(amazonMusicHostname, trackInfo, playbackTimestamps))
-            );
+            await withDiscordTimeout(client.user.setActivity(createDiscordActivity(trackInfo, playbackTimestamps)));
         } else {
             await withDiscordTimeout(client.user.clearActivity());
         }
