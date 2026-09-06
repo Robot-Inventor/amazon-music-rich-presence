@@ -15,7 +15,7 @@
   "author": "Robot-Inventor",
   "type": "module",
   "scripts": {
-    "lint": "tsc --noEmit && eslint \"./src/**/*\"",
+    "lint": "tsc --noEmit && knip && eslint \"./src/**/*\"",
     "format": "prettier --write \"./src/**/*\"",
     "format:check": "prettier --check \"./src/**/*\"",
     "build": "bun run vite build && bunx electrobun build --env=stable",
@@ -39,7 +39,9 @@
     "concurrently": "^10.0.5",
     "devtools-protocol": "^0.0.1692173",
     "electrobun": "^2.0.1",
+    "eslint": "^10.10.0",
     "jiti": "^2.7.0",
+    "knip": "^6.34.0",
     "lucide-react": "^1.41.0",
     "prettier": "^3.9.6",
     "the-new-css-reset": "^1.11.3",
