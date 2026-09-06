@@ -1,7 +1,9 @@
 import { style } from "@vanilla-extract/css";
+import { vars } from "../theme.css";
 
 const toastViewportStyles = style({
     bottom: "1rem",
+    color: vars.color.onBackground,
     display: "flex",
     flexDirection: "column-reverse",
     gap: "0.5rem",
@@ -16,7 +18,7 @@ const toastStyles = style({
         outline: "0.125rem solid #308286"
     },
 
-    background: "#222",
+    background: vars.color.surface,
     borderRadius: "0.5rem",
     boxShadow: "0 0.5rem 1.5rem rgb(0 0 0 / 30%)",
     padding: "1rem",
@@ -54,17 +56,17 @@ const toastTitleStyles = style({
 });
 
 const toastDescriptionStyles = style({
-    color: "#aaa",
+    color: vars.color.onBackgroundVariant,
     gridColumn: "1 / 2",
     gridRow: "2 / 3"
 });
 
 const toastCloseStyles = style({
     ":focus-visible": {
-        outline: "0.125rem solid #308286"
+        outline: `0.125rem solid ${vars.color.primary}`
     },
 
-    background: "#333",
+    background: vars.color.surfaceContainer,
     borderRadius: "0.25rem",
     cursor: "pointer",
     gridColumn: "2 / 3",

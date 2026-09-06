@@ -3,15 +3,17 @@ import "the-new-css-reset/css/reset.css";
 
 import type { AppRPC, CurrentTrackUpdate } from "../shared/rpc";
 import { type ReactNode, StrictMode, useSyncExternalStore } from "react";
-import { appNameStyles, launcherStyles } from "./index.css";
+import { appNameStyles, launcherStyles, mainStyles } from "./index.css";
 import { Electroview } from "electrobun/view";
 import { LaunchAmazonMusic } from "./components/LaunchAmazonMusic";
 import type { PlaybackTimestamps } from "../shared/playback";
 import { RichPresencePlayer } from "./components/RichPresencePlayer";
 import { ToastNotifications } from "./components/ToastNotifications";
 import type { TrackInfo } from "../shared/trackInfo";
-// eslint-disable-next-line import-x/max-dependencies
 import { createRoot } from "react-dom/client";
+import { mergeClassNames } from "../utils/mergeClassNames";
+// eslint-disable-next-line import-x/max-dependencies
+import { themeClass } from "./theme.css";
 
 interface CurrentTrackState {
     readonly amazonMusicHostname: string | null;
@@ -72,7 +74,7 @@ const MainView = (): ReactNode => {
 
     return (
         <ToastNotifications>
-            <main>
+            <main className={mergeClassNames(themeClass, mainStyles)}>
                 <h1 className={appNameStyles}>Amazon Music Rich Presence</h1>
                 <LaunchAmazonMusic className={launcherStyles} onLaunch={() => rpc.request.launchAmazonMusic({})} />
                 <RichPresencePlayer
