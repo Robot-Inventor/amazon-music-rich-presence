@@ -40,10 +40,6 @@ const getMainViewUrl = async (): Promise<string> => {
 const url = await getMainViewUrl();
 
 const getAmazonMusicExecutablePath = (): string | null => {
-    if (process.platform !== "win32") {
-        return null;
-    }
-
     const localAppData = process.env["LOCALAPPDATA"];
     return localAppData ? join(localAppData, "Amazon Music", "Amazon Music.exe") : null;
 };
