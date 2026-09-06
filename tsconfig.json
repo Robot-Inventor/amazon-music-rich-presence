@@ -5,7 +5,10 @@
         "jsx": "react-jsx",
         "jsxImportSource": null,
         "types": ["bun"],
-        "ignoreDeprecations": "6.0"
+        "ignoreDeprecations": "6.0",
+        "declaration": false,
+        "exactOptionalPropertyTypes": false,
+        "noImplicitReturns": false
     },
     "include": ["src/**/*.ts", "src/**/*.tsx", "vite.config.ts", "hutch.config.ts", "electrobun.config.ts"],
     "exclude": ["src/**/*.test.ts"]

@@ -15,7 +15,7 @@
   "author": "Robot-Inventor",
   "type": "module",
   "scripts": {
-    "lint": "eslint \"./src/**/*\"",
+    "lint": "tsc --noEmit && eslint \"./src/**/*\"",
     "format": "prettier --write \"./src/**/*\"",
     "format:check": "prettier --check \"./src/**/*\"",
     "build": "bun run vite build && bunx electrobun build --env=stable",
