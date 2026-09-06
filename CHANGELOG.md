@@ -1,5 +1,11 @@
 # amazon-music-rich-presence
 
+## 1.1.0
+
+### Minor Changes
+
+- [#12](https://github.com/Robot-Inventor/amazon-music-rich-presence/pull/12) [`f5e9e55`](https://github.com/Robot-Inventor/amazon-music-rich-presence/commit/f5e9e5574a3223d34d1cf09420898605b19339e0) Thanks [@Robot-Inventor](https://github.com/Robot-Inventor)! - feat: match color scheme to Discord
+
 ## 1.0.1
 
 ### Patch Changes
