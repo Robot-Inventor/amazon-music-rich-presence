@@ -1,5 +1,5 @@
 {
-    "extends": ["./.hutch/devkit/tsconfig.json", "@robot-inventor/tsconfig-base/react-emotion.json"],
+    "extends": ["./.hutch/devkit/tsconfig.json", "@robot-inventor/tsconfig-base/react.json"],
     "compilerOptions": {
         "rootDir": ".",
         "jsx": "react-jsx",
