@@ -335,4 +335,4 @@ const startAmazonMusicPolling = (
     });
 };
 
-export { startAmazonMusicPolling, stopAmazonMusicPolling };
+export { startAmazonMusicPolling };

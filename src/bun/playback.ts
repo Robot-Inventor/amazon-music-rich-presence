@@ -115,4 +115,4 @@ const getPlaybackTimestamps = (trackKey: string, playback: PlaybackSnapshot): Pl
         : null;
 };
 
-export { getPlaybackTimestamps, parsePlaybackSnapshot, resetPlaybackSyncState, type PlaybackSnapshot };
+export { getPlaybackTimestamps, parsePlaybackSnapshot, resetPlaybackSyncState };
