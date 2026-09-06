@@ -5,6 +5,7 @@ import type { TrackInfo } from "./trackInfo";
 type CurrentTrackUpdate =
     | {
           readonly kind: "track";
+          readonly amazonMusicHostname: string;
           readonly playbackTimestamps: PlaybackTimestamps | null;
           readonly trackInfo: TrackInfo;
       }
@@ -23,6 +24,7 @@ type LaunchAmazonMusicResult =
 
 interface OpenAmazonMusicParams {
     readonly albumId: string;
+    readonly amazonMusicHostname: string;
     readonly trackId: string;
 }
 

@@ -4,6 +4,7 @@ import { parsePlaybackSnapshot } from "./playback";
 import { type } from "arktype";
 
 const parseTrackSnapshot = type({
+    amazonMusicHostname: "string",
     playback: parsePlaybackSnapshot,
     trackInfo: parseTrackInfo
 });
@@ -36,6 +37,7 @@ const extractTrackInfo = async (client: CdpClient): Promise<TrackSnapshot | null
             const title = getText(['.trackMetadata .title', '.trackTitle']);
             if (!title) return null;
             return {
+                amazonMusicHostname: window.location.hostname,
                 playback: {
                     currentPlaybackPosition: currentPlaybackPosition && currentPlaybackPosition.textContent
                         ? currentPlaybackPosition.textContent.trim()

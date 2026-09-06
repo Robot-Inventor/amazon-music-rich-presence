@@ -6,12 +6,21 @@ import { buildAmazonMusicAlbumUrl } from "../utils/amazonMusicUrl";
 const DISCORD_ACTIVITY_TYPE_LISTENING = 2;
 const DISCORD_BUTTON_LABEL = "Listen on Amazon Music";
 
-const getPresenceKey = (trackInfo: TrackInfo | null, playbackTimestamps: PlaybackTimestamps | null): string =>
-    JSON.stringify({ playbackTimestamps, trackInfo });
+const getPresenceKey = (
+    amazonMusicHostname: string | null,
+    trackInfo: TrackInfo | null,
+    playbackTimestamps: PlaybackTimestamps | null
+): string => JSON.stringify({ amazonMusicHostname, playbackTimestamps, trackInfo });
 
-const createDiscordActivity = (trackInfo: TrackInfo, playbackTimestamps: PlaybackTimestamps | null): SetActivity => {
+const createDiscordActivity = (
+    amazonMusicHostname: string,
+    trackInfo: TrackInfo,
+    playbackTimestamps: PlaybackTimestamps | null
+): SetActivity => {
     const amazonMusicUrl =
-        trackInfo.albumId && trackInfo.trackId ? buildAmazonMusicAlbumUrl(trackInfo.albumId, trackInfo.trackId) : null;
+        trackInfo.albumId && trackInfo.trackId
+            ? buildAmazonMusicAlbumUrl(amazonMusicHostname, trackInfo.albumId, trackInfo.trackId)
+            : null;
 
     return {
         details: trackInfo.title,

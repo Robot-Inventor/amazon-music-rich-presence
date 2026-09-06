@@ -12,11 +12,12 @@ import type { TrackInfo } from "../shared/trackInfo";
 import { createRoot } from "react-dom/client";
 
 interface CurrentTrackState {
+    readonly amazonMusicHostname: string | null;
     readonly playbackTimestamps: PlaybackTimestamps | null;
     readonly trackInfo: TrackInfo | null;
 }
 
-let currentTrackState: CurrentTrackState = { playbackTimestamps: null, trackInfo: null };
+let currentTrackState: CurrentTrackState = { amazonMusicHostname: null, playbackTimestamps: null, trackInfo: null };
 const currentTrackSubscribers = new Set<() => void>();
 
 const getCurrentTrackState = (): CurrentTrackState => currentTrackState;
@@ -31,8 +32,12 @@ const subscribeToCurrentTrack = (subscriber: () => void): (() => void) => {
 const updateCurrentTrackState = (update: CurrentTrackUpdate): void => {
     currentTrackState =
         update.kind === "no-track"
-            ? { playbackTimestamps: null, trackInfo: null }
-            : { playbackTimestamps: update.playbackTimestamps, trackInfo: update.trackInfo };
+            ? { amazonMusicHostname: null, playbackTimestamps: null, trackInfo: null }
+            : {
+                  amazonMusicHostname: update.amazonMusicHostname,
+                  playbackTimestamps: update.playbackTimestamps,
+                  trackInfo: update.trackInfo
+              };
 
     currentTrackSubscribers.forEach((subscriber) => {
         subscriber();
@@ -57,16 +62,18 @@ if (!rootElement) {
 }
 
 const MainView = (): ReactNode => {
-    const { playbackTimestamps, trackInfo: currentTrack } = useSyncExternalStore(
-        subscribeToCurrentTrack,
-        getCurrentTrackState
-    );
+    const {
+        amazonMusicHostname,
+        playbackTimestamps,
+        trackInfo: currentTrack
+    } = useSyncExternalStore(subscribeToCurrentTrack, getCurrentTrackState);
 
     return (
         <main>
             <h1 className={appNameStyles}>Amazon Music Rich Presence</h1>
             <LaunchAmazonMusic className={launcherStyles} onLaunch={() => rpc.request.launchAmazonMusic({})} />
             <RichPresencePlayer
+                amazonMusicHostname={amazonMusicHostname}
                 openAmazonMusic={(params) => rpc.request.openAmazonMusic(params)}
                 playbackTimestamps={playbackTimestamps}
                 trackInfo={currentTrack}

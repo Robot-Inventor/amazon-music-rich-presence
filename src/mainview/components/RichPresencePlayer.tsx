@@ -28,6 +28,7 @@ const SECONDS_PER_HOUR = MINUTES_PER_HOUR * SECONDS_PER_MINUTE;
 const TIME_PART_WIDTH = 2;
 
 interface RichPresencePlayerProps {
+    amazonMusicHostname?: string | null;
     trackInfo?: Partial<TrackInfo> | null;
     playbackTimestamps?: PlaybackTimestamps | null;
     openAmazonMusic: (params: OpenAmazonMusicParams) => Promise<undefined>;
@@ -95,27 +96,19 @@ const PlaybackProgress = ({ playbackTimestamps }: PlaybackProgressProps): ReactN
     );
 };
 
-const RichPresencePlayer = ({ openAmazonMusic, playbackTimestamps, trackInfo }: RichPresencePlayerProps): ReactNode => {
-    const { album, artist, coverImage, title, albumId, trackId } = trackInfo ?? {};
+interface PlayerContentProps {
+    readonly album: string | null | undefined;
+    readonly artist: string | null | undefined;
+    readonly coverImage: string | null | undefined;
+    readonly playbackTimestamps: PlaybackTimestamps | null | undefined;
+    readonly title: string | null | undefined;
+}
 
-    const amazonMusicUrl = albumId && trackId ? buildAmazonMusicAlbumUrl(albumId, trackId) : null;
-    const amazonMusicParams = albumId && trackId ? { albumId, trackId } : null;
-
+const PlayerContent = ({ album, artist, coverImage, playbackTimestamps, title }: PlayerContentProps): ReactNode => {
     const normalizedArtist = artist ? `by ${artist}` : "by unknown artist";
     const normalizedAlbum = album ? `from ${album}` : "from unknown album";
 
-    const handleClick = async (event: MouseEvent<HTMLAnchorElement>): Promise<void> => {
-        event.preventDefault();
-        try {
-            if (!amazonMusicParams) return;
-            await openAmazonMusic(amazonMusicParams);
-        } catch (error: unknown) {
-            // eslint-disable-next-line no-console
-            console.error("Could not open Amazon Music.", error);
-        }
-    };
-
-    const content = (
+    return (
         <article className={containerStyles}>
             {coverImage ? (
                 <img className={coverStyles} src={coverImage} width={500} height={500} alt="" />
@@ -127,8 +120,48 @@ const RichPresencePlayer = ({ openAmazonMusic, playbackTimestamps, trackInfo }: 
             <PlaybackProgress playbackTimestamps={playbackTimestamps} />
         </article>
     );
+};
 
-    if (!amazonMusicUrl) return content;
+const openAlbum = async (
+    event: MouseEvent<HTMLAnchorElement>,
+    params: OpenAmazonMusicParams,
+    openAmazonMusic: RichPresencePlayerProps["openAmazonMusic"]
+): Promise<void> => {
+    event.preventDefault();
+    try {
+        await openAmazonMusic(params);
+    } catch (error: unknown) {
+        // eslint-disable-next-line no-console
+        console.error("Could not open Amazon Music.", error);
+    }
+};
+
+const RichPresencePlayer = ({
+    amazonMusicHostname,
+    openAmazonMusic,
+    playbackTimestamps,
+    trackInfo
+}: RichPresencePlayerProps): ReactNode => {
+    const { album, artist, coverImage, title, albumId, trackId } = trackInfo ?? {};
+
+    const amazonMusicUrl =
+        amazonMusicHostname && albumId && trackId
+            ? buildAmazonMusicAlbumUrl(amazonMusicHostname, albumId, trackId)
+            : null;
+    const amazonMusicParams =
+        amazonMusicHostname && albumId && trackId ? { albumId, amazonMusicHostname, trackId } : null;
+
+    const content = (
+        <PlayerContent
+            album={album}
+            artist={artist}
+            coverImage={coverImage}
+            playbackTimestamps={playbackTimestamps}
+            title={title}
+        />
+    );
+
+    if (!amazonMusicUrl || !amazonMusicParams) return content;
 
     return (
         <a
@@ -138,7 +171,7 @@ const RichPresencePlayer = ({ openAmazonMusic, playbackTimestamps, trackInfo }: 
             rel="noopener noreferrer"
             aria-label={`Listen to ${title ?? "Unknown music"}${artist ? ` by ${artist}` : ""} on Amazon Music`}
             onClick={(event) => {
-                void handleClick(event);
+                void openAlbum(event, amazonMusicParams, openAmazonMusic);
             }}
         >
             {content}

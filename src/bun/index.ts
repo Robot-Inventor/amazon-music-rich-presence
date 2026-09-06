@@ -69,8 +69,9 @@ const launchAmazonMusic = (): LaunchAmazonMusicResult => {
     }
 };
 
-const openAmazonMusic = ({ albumId, trackId }: OpenAmazonMusicParams): undefined => {
-    Utils.openExternal(buildAmazonMusicAlbumUrl(albumId, trackId));
+const openAmazonMusic = ({ albumId, amazonMusicHostname, trackId }: OpenAmazonMusicParams): undefined => {
+    const albumUrl = buildAmazonMusicAlbumUrl(amazonMusicHostname, albumId, trackId);
+    if (albumUrl) Utils.openExternal(albumUrl);
 };
 
 const getTrayAction = (event: unknown): string | null => {

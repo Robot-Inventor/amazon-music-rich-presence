@@ -56,7 +56,7 @@ const waitForNextTargetSearch = async (retryStartedAt: number, deadline: number)
 
 const publishNoTrackUpdate = (generation: number, publishCurrentTrack: (update: CurrentTrackUpdate) => void): void => {
     resetPlaybackSyncState();
-    publishTrackInfo(null, null, generation);
+    publishTrackInfo({ amazonMusicHostname: null, generation, playbackTimestamps: null, trackInfo: null });
     publishCurrentTrack({ kind: "no-track" });
 };
 
@@ -179,10 +179,10 @@ const updateCurrentTrack = async (
         return;
     }
 
-    const { playback, trackInfo } = trackSnapshot;
+    const { amazonMusicHostname, playback, trackInfo } = trackSnapshot;
     const playbackTimestamps = getPlaybackTimestamps(getTrackInfoKey(trackInfo), playback);
-    publishTrackInfo(trackInfo, playbackTimestamps, generation);
-    publishCurrentTrack({ kind: "track", playbackTimestamps, trackInfo });
+    publishTrackInfo({ amazonMusicHostname, generation, playbackTimestamps, trackInfo });
+    publishCurrentTrack({ amazonMusicHostname, kind: "track", playbackTimestamps, trackInfo });
 };
 
 const handlePollingError = (generation: number, error: unknown): void => {
