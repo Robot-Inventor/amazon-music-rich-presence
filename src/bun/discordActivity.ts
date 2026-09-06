@@ -6,12 +6,6 @@ import { buildRegionNeutralAmazonMusicAlbumUrl } from "../utils/amazonMusicUrl";
 const DISCORD_ACTIVITY_TYPE_LISTENING = 2;
 const DISCORD_BUTTON_LABEL = "Listen on Amazon Music";
 
-const getPresenceKey = (
-    amazonMusicHostname: string | null,
-    trackInfo: TrackInfo | null,
-    playbackTimestamps: PlaybackTimestamps | null
-): string => JSON.stringify({ amazonMusicHostname, playbackTimestamps, trackInfo });
-
 const createDiscordActivity = (trackInfo: TrackInfo, playbackTimestamps: PlaybackTimestamps | null): SetActivity => {
     const amazonMusicUrls = trackInfo.trackId ? buildRegionNeutralAmazonMusicAlbumUrl(trackInfo.trackId) : null;
 
@@ -37,4 +31,4 @@ const createDiscordActivity = (trackInfo: TrackInfo, playbackTimestamps: Playbac
     };
 };
 
-export { createDiscordActivity, getPresenceKey };
+export { createDiscordActivity };

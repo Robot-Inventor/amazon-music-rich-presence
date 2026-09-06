@@ -1,7 +1,7 @@
-import { createDiscordActivity, getPresenceKey } from "./discordActivity";
 import { Client } from "@xhayper/discord-rpc";
 import type { PlaybackTimestamps } from "../shared/playback";
 import type { TrackInfo } from "../shared/trackInfo";
+import { createDiscordActivity } from "./discordActivity";
 import { withDiscordTimeout } from "./discordRpcUtils";
 
 const DISCORD_RECONNECT_INTERVAL_MS = 5_000;
@@ -114,7 +114,7 @@ const updateDiscordPresence = async ({
     trackInfo
 }: PresenceUpdate): Promise<void> => {
     if (!isActiveGeneration(generation)) return;
-    const trackInfoKey = getPresenceKey(amazonMusicHostname, trackInfo, playbackTimestamps);
+    const trackInfoKey = JSON.stringify({ amazonMusicHostname, playbackTimestamps, trackInfo });
     if (!force && trackInfoKey === lastPublishedTrackKey) return;
 
     const client = discordClient;
