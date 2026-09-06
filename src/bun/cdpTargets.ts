@@ -20,15 +20,10 @@ const parseDebugTargets = type("string.json.parse").to(
 
 type DebugTarget = (typeof parseDebugTargets.infer)[number];
 
-interface TargetQuery {
-    readonly targetId?: string;
-    readonly timeoutMs?: number;
-}
-
 const getAmazonMusicTarget = async ({
     targetId,
     timeoutMs = TARGET_REQUEST_TIMEOUT_MS
-}: TargetQuery = {}): Promise<DebugTarget | null> => {
+}: { readonly targetId?: string; readonly timeoutMs?: number } = {}): Promise<DebugTarget | null> => {
     const response = await fetch(DEBUG_ENDPOINT, { signal: AbortSignal.timeout(timeoutMs) });
     if (!response.ok) {
         throw new Error(`Remote debugging endpoint returned ${String(response.status)}.`);

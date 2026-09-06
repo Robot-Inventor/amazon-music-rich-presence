@@ -1,10 +1,10 @@
 /* eslint-disable max-lines */
 import { CDP_CONNECT_TIMEOUT_MS, type CdpClient, CdpDisconnectedError, createCdpClient } from "./cdp";
 import { type DebugTarget, getAmazonMusicTarget } from "./cdpTargets";
-import { extractTrackInfo, getTrackInfoKey } from "./trackInfo";
 import { getPlaybackTimestamps, resetPlaybackSyncState } from "./playback";
-import { publishTrackInfo, startDiscordRpc, stopDiscordRpc } from "./discordRpc";
+import { queueDiscordPresence, startDiscordRpc, stopDiscordRpc } from "./discordRpc";
 import type { CurrentTrackUpdate } from "../shared/rpc";
+import { extractTrackInfo } from "./trackInfo";
 
 const POLL_INTERVAL_MS = 5_000;
 const TARGET_RETRY_INTERVAL_MS = 1_000;
@@ -22,7 +22,6 @@ interface AmazonMusicPollingOptions {
 
 interface PollingRunOptions {
     readonly generation: number;
-    readonly publishCurrentTrack: (update: CurrentTrackUpdate) => void;
     readonly shouldLogStartupFailure: boolean;
     readonly startDiscordBeforeTargetSearch: boolean;
     readonly targetWaitTimeoutMs: number;
@@ -37,7 +36,6 @@ interface PollingState {
     readonly client: CdpClient;
     readonly generation: number;
     readonly nextPollAt: number;
-    readonly publishCurrentTrack: (update: CurrentTrackUpdate) => void;
     readonly target: DebugTarget;
 }
 
@@ -54,15 +52,16 @@ const waitForNextTargetSearch = async (retryStartedAt: number, deadline: number)
     if (waitTime > NO_DELAY_MS) await wait(waitTime);
 };
 
-const publishNoTrackUpdate = (generation: number, publishCurrentTrack: (update: CurrentTrackUpdate) => void): void => {
+let publishCurrentTrackToView: ((update: CurrentTrackUpdate) => void) | null = null;
+
+const publishNoTrackUpdate = (generation: number): void => {
     resetPlaybackSyncState();
-    publishTrackInfo({ amazonMusicHostname: null, generation, playbackTimestamps: null, trackInfo: null });
-    publishCurrentTrack({ kind: "no-track" });
+    queueDiscordPresence({ amazonMusicHostname: null, generation, playbackTimestamps: null, trackInfo: null });
+    publishCurrentTrackToView?.({ kind: "no-track" });
 };
 
 let pollingGeneration = 0;
 let activeClient: CdpClient | null = null;
-let publishCurrentTrackToView: ((update: CurrentTrackUpdate) => void) | null = null;
 
 const stopAmazonMusicPolling = (): void => {
     ++pollingGeneration;
@@ -166,23 +165,19 @@ const recoverCdpClient = async (
     return createCdpClient(replacementTarget.webSocketDebuggerUrl);
 };
 
-const updateCurrentTrack = async (
-    client: CdpClient,
-    generation: number,
-    publishCurrentTrack: (update: CurrentTrackUpdate) => void
-): Promise<void> => {
+const updateCurrentTrack = async (client: CdpClient, generation: number): Promise<void> => {
     const trackSnapshot = await extractTrackInfo(client);
     if (generation !== pollingGeneration) return;
 
     if (!trackSnapshot) {
-        publishNoTrackUpdate(generation, publishCurrentTrack);
+        publishNoTrackUpdate(generation);
         return;
     }
 
     const { amazonMusicHostname, playback, trackInfo } = trackSnapshot;
-    const playbackTimestamps = getPlaybackTimestamps(getTrackInfoKey(trackInfo), playback);
-    publishTrackInfo({ amazonMusicHostname, generation, playbackTimestamps, trackInfo });
-    publishCurrentTrack({ amazonMusicHostname, kind: "track", playbackTimestamps, trackInfo });
+    const playbackTimestamps = getPlaybackTimestamps(JSON.stringify(trackInfo), playback);
+    queueDiscordPresence({ amazonMusicHostname, generation, playbackTimestamps, trackInfo });
+    publishCurrentTrackToView?.({ amazonMusicHostname, kind: "track", playbackTimestamps, trackInfo });
 };
 
 const handlePollingError = (generation: number, error: unknown): void => {
@@ -205,9 +200,7 @@ const scheduleAfterDisconnect = async (state: PollingState, poll: PollingFunctio
     const replacementClient = await recoverCdpClient(state.client, state.target, state.generation);
 
     if (!replacementClient || state.generation !== pollingGeneration) {
-        if (state.generation === pollingGeneration) {
-            publishNoTrackUpdate(state.generation, state.publishCurrentTrack);
-        }
+        if (state.generation === pollingGeneration) publishNoTrackUpdate(state.generation);
         replacementClient?.close();
         return;
     }
@@ -218,34 +211,24 @@ const scheduleAfterDisconnect = async (state: PollingState, poll: PollingFunctio
             client: replacementClient,
             generation: state.generation,
             nextPollAt: Date.now(),
-            publishCurrentTrack: state.publishCurrentTrack,
             target: state.target
         },
         poll
     );
 };
 
-const pollAmazonMusic = async ({
-    client,
-    generation,
-    nextPollAt,
-    publishCurrentTrack,
-    target
-}: PollingState): Promise<void> => {
+const pollAmazonMusic = async ({ client, generation, nextPollAt, target }: PollingState): Promise<void> => {
     if (generation !== pollingGeneration) return;
 
     try {
-        await updateCurrentTrack(client, generation, publishCurrentTrack);
+        await updateCurrentTrack(client, generation);
     } catch (error: unknown) {
         if (!(error instanceof CdpDisconnectedError)) throw error;
-        await scheduleAfterDisconnect({ client, generation, nextPollAt, publishCurrentTrack, target }, pollAmazonMusic);
+        await scheduleAfterDisconnect({ client, generation, nextPollAt, target }, pollAmazonMusic);
         return;
     }
 
-    schedulePoll(
-        { client, generation, nextPollAt: nextPollAt + POLL_INTERVAL_MS, publishCurrentTrack, target },
-        pollAmazonMusic
-    );
+    schedulePoll({ client, generation, nextPollAt: nextPollAt + POLL_INTERVAL_MS, target }, pollAmazonMusic);
 };
 
 const activateClient = (client: CdpClient, generation: number): boolean => {
@@ -275,13 +258,7 @@ const stopAfterStartupFailure = (generation: number, message: string, reportFail
 
 const connectAndPoll = async (
     searchResult: TargetSearchResult,
-    {
-        generation,
-        publishCurrentTrack,
-        shouldLogStartupFailure,
-        startDiscordBeforeTargetSearch,
-        targetWaitTimeoutMs
-    }: PollingRunOptions
+    { generation, shouldLogStartupFailure, startDiscordBeforeTargetSearch, targetWaitTimeoutMs }: PollingRunOptions
 ): Promise<void> => {
     const client = await connectAfterLaunch(searchResult.target, generation, searchResult.deadline);
     if (!client) {
@@ -303,14 +280,12 @@ const connectAndPoll = async (
         client,
         generation,
         nextPollAt: Date.now(),
-        publishCurrentTrack,
         target: searchResult.target
     });
 };
 
 const runAmazonMusicPolling = async ({
     generation,
-    publishCurrentTrack,
     shouldLogStartupFailure,
     startDiscordBeforeTargetSearch,
     targetWaitTimeoutMs
@@ -330,7 +305,6 @@ const runAmazonMusicPolling = async ({
 
     await connectAndPoll(searchResult, {
         generation,
-        publishCurrentTrack,
         shouldLogStartupFailure,
         startDiscordBeforeTargetSearch,
         targetWaitTimeoutMs
@@ -353,7 +327,6 @@ const startAmazonMusicPolling = (
     if (startDiscordBeforeTargetSearch) startDiscordRpc(generation);
     void runAmazonMusicPolling({
         generation,
-        publishCurrentTrack,
         shouldLogStartupFailure,
         startDiscordBeforeTargetSearch,
         targetWaitTimeoutMs

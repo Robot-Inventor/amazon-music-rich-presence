@@ -74,11 +74,6 @@ const openAmazonMusic = ({ albumId, amazonMusicHostname, trackId }: OpenAmazonMu
     if (albumUrl) Utils.openExternal(albumUrl);
 };
 
-const getTrayAction = (event: unknown): string | null => {
-    const parsedEvent = parseTrayClickedEvent(event);
-    return parsedEvent instanceof type.errors ? null : parsedEvent.data.action;
-};
-
 const rpc = BrowserView.defineRPC<AppRPC>({
     handlers: {
         messages: {},
@@ -139,7 +134,10 @@ tray.setMenu([
 ]);
 
 tray.on("tray-clicked", (event) => {
-    const action = getTrayAction(event);
+    const parsedEvent = parseTrayClickedEvent(event);
+    if (parsedEvent instanceof type.errors) return;
+
+    const { action } = parsedEvent.data;
     if (action === "show-window") win.show();
     if (action === "launch-amazon-music") launchAmazonMusic();
     if (action === "quit") Utils.quit();

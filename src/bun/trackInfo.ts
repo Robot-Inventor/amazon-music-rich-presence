@@ -1,6 +1,6 @@
-import { type TrackInfo, parseTrackInfo } from "../shared/trackInfo";
 import type { CdpClient } from "./cdp";
 import { parsePlaybackSnapshot } from "./playback";
+import { parseTrackInfo } from "../shared/trackInfo";
 import { type } from "arktype";
 
 const parseTrackSnapshot = type({
@@ -10,8 +10,6 @@ const parseTrackSnapshot = type({
 });
 
 type TrackSnapshot = typeof parseTrackSnapshot.infer;
-
-const getTrackInfoKey = (trackInfo: TrackInfo): string => JSON.stringify(trackInfo);
 
 const extractTrackInfo = async (client: CdpClient): Promise<TrackSnapshot | null> => {
     const value = await client.evaluate(`
@@ -63,4 +61,4 @@ const extractTrackInfo = async (client: CdpClient): Promise<TrackSnapshot | null
     return trackSnapshot instanceof type.errors ? null : trackSnapshot;
 };
 
-export { extractTrackInfo, getTrackInfoKey, type TrackInfo };
+export { extractTrackInfo };

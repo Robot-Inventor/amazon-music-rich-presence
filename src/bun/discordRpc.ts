@@ -1,7 +1,7 @@
 import { createDiscordActivity, getPresenceKey } from "./discordActivity";
 import { Client } from "@xhayper/discord-rpc";
 import type { PlaybackTimestamps } from "../shared/playback";
-import type { TrackInfo } from "./trackInfo";
+import type { TrackInfo } from "../shared/trackInfo";
 import { withDiscordTimeout } from "./discordRpcUtils";
 
 const DISCORD_RECONNECT_INTERVAL_MS = 5_000;
@@ -64,8 +64,6 @@ const getDiscordReconnectInterval = (): number =>
 
 const isActiveGeneration = (generation: number): boolean => generation === activeGeneration;
 
-const isCurrentDiscordClient = (client: Client): boolean => discordClient === client;
-
 const reconnectDiscordClient = async (client: Client): Promise<boolean> => {
     try {
         await withDiscordTimeout(client.login());
@@ -100,7 +98,7 @@ const sendDiscordPresence = async (client: Client, presence: PresenceData): Prom
     }
 };
 
-const recordPublishedTrack = (client: Client, generation: number, trackInfoKey: string): void => {
+const markPresencePublished = (client: Client, generation: number, trackInfoKey: string): void => {
     discordPresenceErrorReported = false;
     if (isActiveGeneration(generation) && discordClient === client) lastPublishedTrackKey = trackInfoKey;
 };
@@ -125,7 +123,7 @@ const updateDiscordPresence = async ({
     if (!client || discordConnectionState !== "connected") return;
 
     if (await sendDiscordPresence(client, { amazonMusicHostname, playbackTimestamps, trackInfo })) {
-        recordPublishedTrack(client, generation, trackInfoKey);
+        markPresencePublished(client, generation, trackInfoKey);
     }
 };
 
@@ -163,15 +161,9 @@ const scheduleDiscordReconnect = (generation: number, delay: number, reconnect: 
     }, delay);
 };
 
-const retryDiscordReconnect = (generation: number, reconnect: () => Promise<void>): void => {
-    if (isActiveGeneration(generation)) {
-        scheduleDiscordReconnect(generation, getDiscordReconnectInterval(), reconnect);
-    }
-};
-
 const attachDiscordDisconnectHandler = (client: Client, generation: number, reconnect: () => Promise<void>): void => {
     client.on("disconnected", () => {
-        if (!isActiveGeneration(generation) || !isCurrentDiscordClient(client)) return;
+        if (!isActiveGeneration(generation) || discordClient !== client) return;
         if (discordConnectionState !== "connected") return;
 
         discordConnectionState = "reconnecting";
@@ -201,9 +193,9 @@ const replaceDiscordClient = (generation: number, reconnect: () => Promise<void>
 };
 
 const handleDiscordReconnectFailure = (client: Client, generation: number, reconnect: () => Promise<void>): void => {
-    if (isCurrentDiscordClient(client)) discordClient = null;
+    if (discordClient === client) discordClient = null;
     void destroyDiscordClient(client).catch(ignoreError);
-    retryDiscordReconnect(generation, reconnect);
+    scheduleDiscordReconnect(generation, getDiscordReconnectInterval(), reconnect);
 };
 
 const attemptDiscordReconnect = async (generation: number): Promise<void> => {
@@ -216,7 +208,7 @@ const attemptDiscordReconnect = async (generation: number): Promise<void> => {
         return;
     }
 
-    if (!isActiveGeneration(generation) || !isCurrentDiscordClient(client)) {
+    if (!isActiveGeneration(generation) || discordClient !== client) {
         await destroyDiscordClient(client).catch(ignoreError);
         return;
     }
@@ -225,7 +217,7 @@ const attemptDiscordReconnect = async (generation: number): Promise<void> => {
 };
 
 const handleInitialDiscordConnectionFailure = (client: Client, generation: number, error: unknown): void => {
-    if (isCurrentDiscordClient(client)) {
+    if (discordClient === client) {
         discordClient = null;
         discordConnectionState = "unavailable";
     }
@@ -286,8 +278,4 @@ const stopDiscordRpc = (): void => {
     }
 };
 
-const publishTrackInfo = (presenceUpdate: PresenceUpdate): void => {
-    queueDiscordPresence(presenceUpdate);
-};
-
-export { publishTrackInfo, startDiscordRpc, stopDiscordRpc };
+export { queueDiscordPresence, startDiscordRpc, stopDiscordRpc };

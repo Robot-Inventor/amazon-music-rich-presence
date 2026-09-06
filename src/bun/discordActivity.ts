@@ -1,6 +1,6 @@
 import { type SetActivity, StatusDisplayType } from "@xhayper/discord-rpc";
 import type { PlaybackTimestamps } from "../shared/playback";
-import type { TrackInfo } from "./trackInfo";
+import type { TrackInfo } from "../shared/trackInfo";
 import { buildAmazonMusicAlbumUrl } from "../utils/amazonMusicUrl";
 
 const DISCORD_ACTIVITY_TYPE_LISTENING = 2;

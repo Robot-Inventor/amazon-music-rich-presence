@@ -125,7 +125,7 @@ const createCdpClient = async (webSocketUrl: string, connectTimeoutMs = CDP_CONN
     const pending = new Map<number, PendingRequest>();
     let isClosed = false;
 
-    const closeWithError = (): void => {
+    const close = (): void => {
         if (isClosed) return;
         isClosed = true;
         rejectPendingRequests(pending);
@@ -137,18 +137,11 @@ const createCdpClient = async (webSocketUrl: string, connectTimeoutMs = CDP_CONN
     socket.addEventListener("message", (event) => {
         handleCdpMessage(event, pending);
     });
-    socket.addEventListener("error", closeWithError);
-    socket.addEventListener("close", closeWithError);
+    socket.addEventListener("error", close);
+    socket.addEventListener("close", close);
 
     return {
-        close: (): void => {
-            if (isClosed) return;
-
-            isClosed = true;
-            rejectPendingRequests(pending);
-
-            socket.close();
-        },
+        close,
         evaluate: async (expression: string): Promise<unknown> => {
             const params = {
                 awaitPromise: true,
