@@ -37,7 +37,7 @@ interface AppRPC {
             };
             openAmazonMusic: {
                 params: OpenAmazonMusicParams;
-                response: undefined;
+                response: boolean;
             };
         };
         messages: Record<never, never>;

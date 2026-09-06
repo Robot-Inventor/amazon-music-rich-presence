@@ -69,9 +69,9 @@ const launchAmazonMusic = (): LaunchAmazonMusicResult => {
     }
 };
 
-const openAmazonMusic = ({ albumId, amazonMusicHostname, trackId }: OpenAmazonMusicParams): undefined => {
+const openAmazonMusic = ({ albumId, amazonMusicHostname, trackId }: OpenAmazonMusicParams): boolean => {
     const albumUrl = buildAmazonMusicAlbumUrl(amazonMusicHostname, albumId, trackId);
-    if (albumUrl) Utils.openExternal(albumUrl);
+    return albumUrl ? Utils.openExternal(albumUrl) : false;
 };
 
 const rpc = BrowserView.defineRPC<AppRPC>({

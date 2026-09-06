@@ -31,7 +31,7 @@ interface RichPresencePlayerProps {
     amazonMusicHostname?: string | null;
     trackInfo?: Partial<TrackInfo> | null;
     playbackTimestamps?: PlaybackTimestamps | null;
-    openAmazonMusic: (params: OpenAmazonMusicParams) => Promise<undefined>;
+    openAmazonMusic: (params: OpenAmazonMusicParams) => Promise<boolean>;
 }
 
 const formatTime = (seconds: number): string => {
@@ -122,17 +122,21 @@ const PlayerContent = ({ album, artist, coverImage, playbackTimestamps, title }:
     );
 };
 
+interface OpenAlbumOptions {
+    onError: () => void;
+    openAmazonMusic: RichPresencePlayerProps["openAmazonMusic"];
+    params: OpenAmazonMusicParams;
+}
+
 const openAlbum = async (
     event: MouseEvent<HTMLAnchorElement>,
-    params: OpenAmazonMusicParams,
-    openAmazonMusic: RichPresencePlayerProps["openAmazonMusic"]
+    { onError, openAmazonMusic, params }: OpenAlbumOptions
 ): Promise<void> => {
     event.preventDefault();
     try {
-        await openAmazonMusic(params);
-    } catch (error: unknown) {
-        // eslint-disable-next-line no-console
-        console.error("Could not open Amazon Music.", error);
+        if (!(await openAmazonMusic(params))) onError();
+    } catch {
+        onError();
     }
 };
 
@@ -171,7 +175,13 @@ const RichPresencePlayer = ({
             rel="noopener noreferrer"
             aria-label={`Listen to ${title ?? "Unknown music"}${artist ? ` by ${artist}` : ""} on Amazon Music`}
             onClick={(event) => {
-                void openAlbum(event, amazonMusicParams, openAmazonMusic);
+                void openAlbum(event, {
+                    onError: () => {
+                        open(amazonMusicUrl, "_blank", "noopener,noreferrer");
+                    },
+                    openAmazonMusic,
+                    params: amazonMusicParams
+                });
             }}
         >
             {content}

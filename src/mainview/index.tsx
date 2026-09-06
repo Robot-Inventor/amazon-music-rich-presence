@@ -8,7 +8,9 @@ import { Electroview } from "electrobun/view";
 import { LaunchAmazonMusic } from "./components/LaunchAmazonMusic";
 import type { PlaybackTimestamps } from "../shared/playback";
 import { RichPresencePlayer } from "./components/RichPresencePlayer";
+import { ToastNotifications } from "./components/ToastNotifications";
 import type { TrackInfo } from "../shared/trackInfo";
+// eslint-disable-next-line import-x/max-dependencies
 import { createRoot } from "react-dom/client";
 
 interface CurrentTrackState {
@@ -69,16 +71,18 @@ const MainView = (): ReactNode => {
     } = useSyncExternalStore(subscribeToCurrentTrack, getCurrentTrackState);
 
     return (
-        <main>
-            <h1 className={appNameStyles}>Amazon Music Rich Presence</h1>
-            <LaunchAmazonMusic className={launcherStyles} onLaunch={() => rpc.request.launchAmazonMusic({})} />
-            <RichPresencePlayer
-                amazonMusicHostname={amazonMusicHostname}
-                openAmazonMusic={(params) => rpc.request.openAmazonMusic(params)}
-                playbackTimestamps={playbackTimestamps}
-                trackInfo={currentTrack}
-            />
-        </main>
+        <ToastNotifications>
+            <main>
+                <h1 className={appNameStyles}>Amazon Music Rich Presence</h1>
+                <LaunchAmazonMusic className={launcherStyles} onLaunch={() => rpc.request.launchAmazonMusic({})} />
+                <RichPresencePlayer
+                    amazonMusicHostname={amazonMusicHostname}
+                    openAmazonMusic={(params) => rpc.request.openAmazonMusic(params)}
+                    playbackTimestamps={playbackTimestamps}
+                    trackInfo={currentTrack}
+                />
+            </main>
+        </ToastNotifications>
     );
 };
 
