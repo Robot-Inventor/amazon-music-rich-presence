@@ -1,5 +1,11 @@
 # amazon-music-rich-presence
 
+## 1.1.1
+
+### Patch Changes
+
+- [#15](https://github.com/Robot-Inventor/amazon-music-rich-presence/pull/15) [`5b899e4`](https://github.com/Robot-Inventor/amazon-music-rich-presence/commit/5b899e4e687a2509d6afe7c6f2e112f290aa637d) Thanks [@Robot-Inventor](https://github.com/Robot-Inventor)! - refactor: simplify some code
+
 ## 1.1.0
 
 ### Minor Changes
