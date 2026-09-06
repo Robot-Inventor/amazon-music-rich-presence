@@ -5,9 +5,10 @@ import {
     type LaunchAmazonMusicResult,
     type OpenAmazonMusicParams
 } from "../shared/rpc";
-import { BrowserView, BrowserWindow, Tray, Updater, Utils } from "electrobun/main";
+import { BrowserView, BrowserWindow, PATHS, Tray, Updater, Utils } from "electrobun/main";
 import { buildAmazonMusicAlbumUrl } from "../utils/amazonMusicUrl";
 import { join } from "node:path";
+import { setWindowsWindowIcon } from "./windowsIcon";
 import { startAmazonMusicPolling } from "./amazonMusic";
 import { tmpdir } from "node:os";
 import { type } from "arktype";
@@ -94,6 +95,13 @@ const win = new BrowserWindow({
     url
 });
 
+const windowPointer = win.ptr;
+const windowIconPath = join(PATHS.VIEWS_FOLDER, "assets", "app-icon.ico");
+const windowIconSet = Boolean(windowPointer && setWindowsWindowIcon(windowPointer, windowIconPath));
+if (!windowIconSet) {
+    process.stderr.write(`Failed to set the Windows window icon from ${windowIconPath}\n`);
+}
+
 publishCurrentTrackToView = (update: CurrentTrackUpdate): void => {
     win.webview.rpc?.send.currentTrack(update);
 };
@@ -112,7 +120,13 @@ win.on("will-close", (event) => {
     win.hide();
 });
 
-const tray = new Tray({ title: "Amazon Music Rich Presence" });
+const tray = new Tray({
+    height: 32,
+    image: "views://assets/app-icon.ico",
+    template: false,
+    title: "Amazon Music Rich Presence",
+    width: 32
+});
 
 tray.setMenu([
     {

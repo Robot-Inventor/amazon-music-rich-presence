@@ -12,13 +12,15 @@ const config = {
             entrypoint: "src/bun/index.ts"
         },
         copy: {
+            "assets/app-icon.ico": "views/assets/app-icon.ico",
             "dist/assets": "views/mainview/assets",
             "dist/index.html": "views/mainview/index.html"
         },
         mainProcess: "bun",
         watchIgnore: ["dist/**"],
         win: {
-            bundleCEF: false
+            bundleCEF: false,
+            icon: "assets/app-icon.ico"
         }
     },
     runtime: {
