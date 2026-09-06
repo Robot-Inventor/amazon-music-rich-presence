@@ -1,0 +1,56 @@
+name: Release
+
+on:
+    push:
+        branches: [main]
+
+concurrency: ${{ github.workflow }}-${{ github.ref }}
+
+jobs:
+    release:
+        runs-on: windows-latest
+
+        permissions:
+            contents: write
+            id-token: write
+            pull-requests: write
+
+        strategy:
+            matrix:
+                node-version: [latest]
+
+        steps:
+            - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+
+            - name: Use Node.js ${{ matrix.node-version }}
+              uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7
+              with:
+                  node-version: ${{ matrix.node-version }}
+
+            - uses: oven-sh/setup-bun@0c5077e51419868618aeaa5fe8019c62421857d6 # v2
+
+            - run: bun install --frozen-lockfile
+
+            - name: Create Release Pull Request or Publish to npm
+              id: changesets
+              uses: changesets/action@8488615a623b1b9c987934bb89eae8af6a946ac1 # v2.1.1
+              with:
+                  version-script: bun run ci:version
+                  publish-script: bun run ci:publish
+              env:
+                  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+            - name: Upload Windows binary to GitHub Release
+              if: steps.changesets.outputs.published == 'true'
+              shell: pwsh
+              env:
+                  GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+              run: |
+                  $version = (Get-Content -Raw package.json | ConvertFrom-Json).version
+                  $asset = "artifacts/win-x64-AmazonMusicRichPresence-Setup.zip"
+
+                  if (-not (Test-Path -LiteralPath $asset -PathType Leaf)) {
+                      throw "Windows release asset not found: $asset"
+                  }
+
+                  gh release upload "v$version" $asset --repo $env:GITHUB_REPOSITORY --clobber

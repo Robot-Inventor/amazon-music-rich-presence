@@ -3,6 +3,7 @@
   "version": "0.0.0",
   "description": "A small tool that displays the song currently playing on Amazon Music in Discord Rich Presence.",
   "homepage": "https://github.com/Robot-Inventor/amazon-music-rich-presence#readme",
+  "private": true,
   "bugs": {
     "url": "https://github.com/Robot-Inventor/amazon-music-rich-presence/issues"
   },
@@ -19,10 +20,14 @@
     "format:check": "prettier --check \"./src/**/*\"",
     "build": "bun run vite build && bunx electrobun build --env=stable",
     "dev": "concurrently \"bun run vite --port 5173\" \"bunx electrobun dev\"",
-    "inspect": "bun scripts/inspect.ts"
+    "inspect": "bun scripts/inspect.ts",
+    "ci:version": "changeset version",
+    "ci:publish": "bun run build && changeset publish"
   },
   "devDependencies": {
     "@base-ui/react": "^1.8.0",
+    "@changesets/changelog-github": "^1.0.1",
+    "@changesets/cli": "^3.0.2",
     "@robot-inventor/eslint-config": "^13.1.1",
     "@robot-inventor/tsconfig-base": "^7.1.0",
     "@types/bun": "^1.4.1",
