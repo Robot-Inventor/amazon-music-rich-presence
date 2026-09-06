@@ -20,7 +20,6 @@ import { buildAmazonMusicAlbumUrl } from "../../utils/amazonMusicUrl";
 const MILLISECONDS_PER_SECOND = 1_000;
 const MINUTES_PER_HOUR = 60;
 const NO_SECONDS = 0;
-const NO_INTERVAL_ID = 0;
 const PROGRESS_FALLBACK_MAX = 1;
 const PROGRESS_UPDATE_INTERVAL_MS = 250;
 const SECONDS_PER_MINUTE = 60;
@@ -57,7 +56,7 @@ const PlaybackProgress = ({ playbackTimestamps }: PlaybackProgressProps): ReactN
     useEffect(() => {
         if (!playbackTimestamps) {
             return (): void => {
-                clearInterval(NO_INTERVAL_ID);
+                // No timer was created for an absent playback timestamp.
             };
         }
 

@@ -9,15 +9,6 @@ export default defineConfig({
         emptyOutDir: true,
         outDir: "../../dist"
     },
-    optimizeDeps: {
-        include: [
-            "react",
-            "react-dom/client",
-            "use-sync-external-store/shim",
-            "use-sync-external-store/shim/with-selector"
-        ],
-        noDiscovery: true
-    },
     plugins: [react({ jsxImportSource: "react" }), vanillaExtractPlugin()],
     resolve: {
         alias: electrobunViteAliases(join(process.cwd(), ".hutch", "devkit"))

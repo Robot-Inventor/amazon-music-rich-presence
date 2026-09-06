@@ -3,7 +3,7 @@
     "compilerOptions": {
         "rootDir": ".",
         "jsx": "react-jsx",
-        "jsxImportSource": null,
+        "jsxImportSource": "react",
         "types": ["bun"],
         "ignoreDeprecations": "6.0",
         "declaration": false,

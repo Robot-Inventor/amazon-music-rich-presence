@@ -39,17 +39,11 @@ interface PollingState {
     readonly target: DebugTarget;
 }
 
-const wait = async (milliseconds: number): Promise<void> => {
-    await new Promise<void>((resolve) => {
-        setTimeout(resolve, milliseconds);
-    });
-};
-
 const waitForNextTargetSearch = async (retryStartedAt: number, deadline: number): Promise<void> => {
     const retryTime = Math.min(TARGET_RETRY_INTERVAL_MS, Math.max(NO_DELAY_MS, deadline - Date.now()));
     const elapsedTime = Date.now() - retryStartedAt;
     const waitTime = Math.max(NO_DELAY_MS, retryTime - elapsedTime);
-    if (waitTime > NO_DELAY_MS) await wait(waitTime);
+    if (waitTime > NO_DELAY_MS) await Bun.sleep(waitTime);
 };
 
 let publishCurrentTrackToView: ((update: CurrentTrackUpdate) => void) | null = null;
@@ -104,7 +98,7 @@ const waitForConnectionRetry = async (deadline: number): Promise<boolean> => {
     const retryTime = Math.min(TARGET_RETRY_INTERVAL_MS, Math.max(NO_DELAY_MS, deadline - Date.now()));
     if (!(retryTime > NO_DELAY_MS)) return false;
 
-    await wait(retryTime);
+    await Bun.sleep(retryTime);
 
     return true;
 };
