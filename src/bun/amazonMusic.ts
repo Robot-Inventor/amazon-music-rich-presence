@@ -94,13 +94,11 @@ const findTargetAfterLaunch = async (
     return target ? { deadline, target } : null;
 };
 
-const waitForConnectionRetry = async (deadline: number): Promise<boolean> => {
+const waitForConnectionRetry = async (deadline: number): Promise<void> => {
     const retryTime = Math.min(TARGET_RETRY_INTERVAL_MS, Math.max(NO_DELAY_MS, deadline - Date.now()));
-    if (!(retryTime > NO_DELAY_MS)) return false;
+    if (!(retryTime > NO_DELAY_MS)) return;
 
     await Bun.sleep(retryTime);
-
-    return true;
 };
 
 const connectToTarget = async (
@@ -139,7 +137,8 @@ const connectAfterLaunch = async (
             timeoutMs: Math.min(CDP_CONNECT_TIMEOUT_MS, remainingRetryTime)
         }).catch(() => null);
 
-        if (!currentTarget || !(await waitForConnectionRetry(deadline))) return null;
+        if (!currentTarget) return null;
+        await waitForConnectionRetry(deadline);
 
         return connectAfterLaunch(currentTarget, generation, deadline);
     }
