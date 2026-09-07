@@ -102,6 +102,7 @@ if (!rootElement) {
     throw new Error("The React root element is missing.");
 }
 
+// eslint-disable-next-line max-lines-per-function
 const MainView = (): ReactNode => {
     const {
         amazonMusicHostname,
