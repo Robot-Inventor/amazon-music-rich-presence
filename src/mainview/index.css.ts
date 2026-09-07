@@ -12,6 +12,10 @@ const mainStyles = style({
     width: "100%"
 });
 
+const bannerStyles = style({
+    marginBlock: "1rem"
+});
+
 const appNameStyles = style({
     fontSize: "1.5rem",
     fontWeight: "bold",
@@ -22,4 +26,4 @@ const launcherStyles = style({
     margin: "2rem auto"
 });
 
-export { mainStyles, appNameStyles, launcherStyles };
+export { mainStyles, bannerStyles, appNameStyles, launcherStyles };

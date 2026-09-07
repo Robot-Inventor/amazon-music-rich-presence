@@ -3,6 +3,7 @@ name: Release
 on:
     push:
         branches: [main]
+    workflow_dispatch:
 
 concurrency: ${{ github.workflow }}-${{ github.ref }}
 
@@ -31,8 +32,12 @@ jobs:
               env:
                   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
+            - name: Build artifacts for release retry
+              if: github.event_name == 'workflow_dispatch'
+              run: bun run build
+
             - name: Upload Windows binary to GitHub Release
-              if: steps.changesets.outputs.published == 'true'
+              if: steps.changesets.outputs.published == 'true' || github.event_name == 'workflow_dispatch'
               shell: pwsh
               env:
                   GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -45,3 +50,31 @@ jobs:
                   }
 
                   gh release upload "v$version" $asset --repo $env:GITHUB_REPOSITORY --clobber
+
+            - name: Upload updater artifacts to rolling release
+              if: steps.changesets.outputs.published == 'true' || github.event_name == 'workflow_dispatch'
+              shell: pwsh
+              env:
+                  GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+              run: |
+                  $updateAssets = @(
+                      "artifacts/stable-win-x64-update.json",
+                      "artifacts/stable-win-x64-AmazonMusicRichPresence.tar.zst"
+                  )
+                  $patches = Get-ChildItem -LiteralPath "artifacts" -Filter "stable-win-x64-*.patch" -File
+                  if ($patches) {
+                      $updateAssets += $patches.FullName
+                  }
+
+                  foreach ($asset in $updateAssets) {
+                      if (-not (Test-Path -LiteralPath $asset -PathType Leaf)) {
+                          throw "Updater artifact not found: $asset"
+                      }
+                  }
+
+                  gh release view "updates" --repo $env:GITHUB_REPOSITORY *> $null
+                  if ($LASTEXITCODE -ne 0) {
+                      gh release create "updates" --repo $env:GITHUB_REPOSITORY --target $env:GITHUB_SHA --title "Updater artifacts" --notes "Rolling release for Electrobun auto-updates." --latest=false
+                  }
+
+                  gh release upload "updates" @updateAssets --repo $env:GITHUB_REPOSITORY --clobber
