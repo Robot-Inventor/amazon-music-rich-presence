@@ -71,12 +71,25 @@ const openAmazonMusic = ({ albumId, amazonMusicHostname, trackId }: OpenAmazonMu
     return albumUrl ? Utils.openExternal(albumUrl) : false;
 };
 
+const updateApplication = async (): Promise<boolean> => {
+    try {
+        await Updater.downloadUpdate();
+        if (!Updater.updateInfo().updateReady) return false;
+
+        await Updater.applyUpdate();
+        return !Updater.updateInfo().error;
+    } catch {
+        return false;
+    }
+};
+
 const rpc = BrowserView.defineRPC<AppRPC>({
     handlers: {
         messages: {},
         requests: {
             launchAmazonMusic,
-            openAmazonMusic
+            openAmazonMusic,
+            updateApplication
         }
     }
 });
@@ -106,6 +119,19 @@ startAmazonMusicPolling(publishCurrentTrackToView, {
     shouldLogStartupFailure: false,
     startDiscordBeforeTargetSearch: false,
     targetWaitTimeoutMs: STARTUP_TARGET_WAIT_TIMEOUT_MS
+});
+
+const checkForUpdates = async (): Promise<void> => {
+    const update = await Updater.checkForUpdate();
+    if (update.error) {
+        win.webview.rpc?.send.updateError({ message: "Could not check for updates." });
+        return;
+    }
+    if (update.updateAvailable) win.webview.rpc?.send.updateAvailable({ version: update.version });
+};
+
+void checkForUpdates().catch(() => {
+    win.webview.rpc?.send.updateError({ message: "Could not check for updates." });
 });
 
 win.on("will-close", (event) => {

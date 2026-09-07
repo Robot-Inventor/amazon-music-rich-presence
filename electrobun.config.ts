@@ -23,6 +23,10 @@ const config = {
             icon: "assets/app-icon.ico"
         }
     },
+    release: {
+        baseUrl: "https://github.com/Robot-Inventor/amazon-music-rich-presence/releases/download/updates",
+        generatePatch: true
+    },
     runtime: {
         exitOnLastWindowClosed: false
     }

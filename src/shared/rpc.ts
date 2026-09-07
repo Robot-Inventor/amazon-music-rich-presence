@@ -13,6 +13,14 @@ type CurrentTrackUpdate =
           readonly kind: "no-track";
       };
 
+interface UpdateAvailable {
+    readonly version: string;
+}
+
+interface UpdateError {
+    readonly message: string;
+}
+
 type LaunchAmazonMusicResult =
     | {
           readonly ok: true;
@@ -39,6 +47,10 @@ interface AppRPC {
                 params: OpenAmazonMusicParams;
                 response: boolean;
             };
+            updateApplication: {
+                params: Record<string, never>;
+                response: boolean;
+            };
         };
         messages: Record<never, never>;
     }>;
@@ -46,6 +58,8 @@ interface AppRPC {
         requests: Record<never, never>;
         messages: {
             currentTrack: CurrentTrackUpdate;
+            updateAvailable: UpdateAvailable;
+            updateError: UpdateError;
         };
     }>;
 }
@@ -58,5 +72,7 @@ export {
     type AppRPC,
     type CurrentTrackUpdate,
     type LaunchAmazonMusicResult,
-    type OpenAmazonMusicParams
+    type OpenAmazonMusicParams,
+    type UpdateAvailable,
+    type UpdateError
 };
