@@ -1,6 +1,6 @@
 {
   "name": "amazon-music-rich-presence",
-  "version": "1.1.1",
+  "version": "1.2.0",
   "description": "A small tool that displays the song currently playing on Amazon Music in Discord Rich Presence.",
   "homepage": "https://github.com/Robot-Inventor/amazon-music-rich-presence#readme",
   "private": true,
