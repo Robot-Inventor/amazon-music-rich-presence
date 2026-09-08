@@ -16,24 +16,10 @@ const titleStyles = style({
     fontWeight: "bold"
 });
 
-const buttonStyles = style({
+const updatingButtonStyles = style({
     ":disabled": {
-        cursor: "wait",
-        opacity: 0.6
-    },
-
-    ":focus-visible": {
-        outline: `0.125rem solid ${vars.color.primary}`,
-        outlineOffset: "0.125rem"
-    },
-
-    ":hover": {
-        background: vars.color.surfaceContainer
-    },
-
-    borderRadius: "0.25em",
-    cursor: "pointer",
-    padding: "0.25rem 0.5rem"
+        cursor: "wait"
+    }
 });
 
-export { bannerStyles, buttonStyles, titleStyles };
+export { bannerStyles, titleStyles, updatingButtonStyles };

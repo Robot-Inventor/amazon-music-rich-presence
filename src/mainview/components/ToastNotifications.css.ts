@@ -62,16 +62,8 @@ const toastDescriptionStyles = style({
 });
 
 const toastCloseStyles = style({
-    ":focus-visible": {
-        outline: `0.125rem solid ${vars.color.primary}`
-    },
-
-    background: vars.color.surfaceContainer,
-    borderRadius: "0.25rem",
-    cursor: "pointer",
     gridColumn: "2 / 3",
-    gridRow: "1 / 3",
-    padding: "0.25rem 0.5rem"
+    gridRow: "1 / 3"
 });
 
 export {
