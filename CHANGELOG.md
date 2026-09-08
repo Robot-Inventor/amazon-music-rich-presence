@@ -1,5 +1,11 @@
 # amazon-music-rich-presence
 
+## 1.2.1
+
+### Patch Changes
+
+- [#19](https://github.com/Robot-Inventor/amazon-music-rich-presence/pull/19) [`1a95194`](https://github.com/Robot-Inventor/amazon-music-rich-presence/commit/1a951942988892f350a9f462fcb2a7785c2d7122) Thanks [@Robot-Inventor](https://github.com/Robot-Inventor)! - feat: standardize text button styles
+
 ## 1.2.0
 
 ### Minor Changes
