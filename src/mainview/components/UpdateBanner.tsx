@@ -1,5 +1,6 @@
-import { bannerStyles, buttonStyles, titleStyles } from "./UpdateBanner.css";
+import { bannerStyles, titleStyles, updatingButtonStyles } from "./UpdateBanner.css";
 import type { ReactNode } from "react";
+import { TextButton } from "./TextButton";
 import { mergeClassNames } from "../../utils/mergeClassNames";
 
 interface UpdateBannerProps {
@@ -12,9 +13,9 @@ interface UpdateBannerProps {
 const UpdateBanner = ({ isUpdating, onUpdate, version, className }: UpdateBannerProps): ReactNode => (
     <section aria-live="polite" className={mergeClassNames(bannerStyles, className)}>
         <h2 className={titleStyles}>The latest version, {version}, is available.</h2>
-        <button className={buttonStyles} disabled={isUpdating} onClick={onUpdate} type="button">
+        <TextButton className={updatingButtonStyles} disabled={isUpdating} onClick={onUpdate}>
             {isUpdating ? "Updating..." : "Update"}
-        </button>
+        </TextButton>
     </section>
 );
 
