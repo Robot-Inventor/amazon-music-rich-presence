@@ -37,7 +37,7 @@
     "@vanilla-extract/vite-plugin": "^5.2.6",
     "@vitejs/plugin-react": "^6.1.1",
     "concurrently": "^10.0.5",
-    "devtools-protocol": "^0.0.1693794",
+    "devtools-protocol": "^0.0.1694333",
     "electrobun": "^2.0.1",
     "eslint": "^10.10.0",
     "jiti": "^2.7.0",
