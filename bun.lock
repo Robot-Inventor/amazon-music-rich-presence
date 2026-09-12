@@ -22,7 +22,7 @@
         "@vanilla-extract/vite-plugin": "^5.2.6",
         "@vitejs/plugin-react": "^6.1.1",
         "concurrently": "^10.0.5",
-        "devtools-protocol": "^0.0.1695952",
+        "devtools-protocol": "^0.0.1696802",
         "electrobun": "^2.0.1",
         "eslint": "^10.10.0",
         "jiti": "^2.7.0",
@@ -608,7 +608,7 @@
 
     "detect-libc": ["detect-libc@2.1.2", "", {}, "sha512-Btj2BOOO83o3WyH59e8MgXsxEQVcarkUOpEYrubB0urwnN10yQ364rsiByU11nZlqWYZm05i/of7io4mzihBtQ=="],
 
-    "devtools-protocol": ["devtools-protocol@0.0.1695952", "", {}, "sha512-RTEPxeXTPbYDXSFQkhybpYXdkPJyw9W0svEztplXA6VBuYha8WxK3Tj6kOZb/XgDCanbfQRXNSahjM68TD/Gmw=="],
+    "devtools-protocol": ["devtools-protocol@0.0.1696802", "", {}, "sha512-FO5/SENfvc2K8wRnWQflKcwuoTH4dBkXCWTQ9ebIWtuX8JM5+ZvCotaEmkfh21pO7TvIKGTM3hG4xFiq9WTwmg=="],
 
     "discord-api-types": ["discord-api-types@0.38.55", "", {}, "sha512-ytuaRTzdnHUCXJ6KjL9MrItQX0xKncBKEeYI1Bst4+ud47eejH3cG6gaesYakjpPcUhh68XYS2YwGq3mmujFsA=="],
 
