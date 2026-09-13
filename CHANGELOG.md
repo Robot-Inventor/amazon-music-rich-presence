@@ -1,5 +1,19 @@
 # amazon-music-rich-presence
 
+## 1.3.0
+
+### Minor Changes
+
+- [#33](https://github.com/Robot-Inventor/amazon-music-rich-presence/pull/33) [`27a235f`](https://github.com/Robot-Inventor/amazon-music-rich-presence/commit/27a235f35cfca046158884c6b6eeda83b51fe97a) Thanks [@Robot-Inventor](https://github.com/Robot-Inventor)! - feat: add a setting to disable automatic updates
+
+### Patch Changes
+
+- [#32](https://github.com/Robot-Inventor/amazon-music-rich-presence/pull/32) [`720cba1`](https://github.com/Robot-Inventor/amazon-music-rich-presence/commit/720cba1cba0cdda4a13de460c77a34bee6a8a24f) Thanks [@Robot-Inventor](https://github.com/Robot-Inventor)! - feat: add an icon to the [Launch Amazon Music] button
+
+- [#27](https://github.com/Robot-Inventor/amazon-music-rich-presence/pull/27) [`654f378`](https://github.com/Robot-Inventor/amazon-music-rich-presence/commit/654f378ed5e471c7968d365130e51cd00fde0d32) Thanks [@Robot-Inventor](https://github.com/Robot-Inventor)! - fix: fixed an issue where a "failed" toast notification was displayed even after a successful update
+
+- [#31](https://github.com/Robot-Inventor/amazon-music-rich-presence/pull/31) [`b2c520f`](https://github.com/Robot-Inventor/amazon-music-rich-presence/commit/b2c520f91ae574c7ba7dd3c55e4523a9748de835) Thanks [@Robot-Inventor](https://github.com/Robot-Inventor)! - perf: enable React Compiler
+
 ## 1.2.1
 
 ### Patch Changes
