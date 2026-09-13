@@ -9,7 +9,6 @@ import {
 import type { ReactNode } from "react";
 import { TextButton } from "./TextButton";
 import { Toast } from "@base-ui/react/toast";
-import { themeClass } from "../theme.css";
 
 interface ToastNotificationsProps {
     children: ReactNode;
@@ -19,7 +18,7 @@ const ToastList = (): ReactNode => {
     const { toasts } = Toast.useToastManager();
 
     return (
-        <Toast.Portal className={themeClass}>
+        <Toast.Portal>
             <Toast.Viewport className={toastViewportStyles}>
                 {toasts.map((toast) => (
                     <Toast.Root className={toastStyles} key={toast.id} toast={toast}>

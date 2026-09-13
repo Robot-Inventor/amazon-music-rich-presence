@@ -15,7 +15,7 @@ const toastViewportStyles = style({
 
 const toastStyles = style({
     ":focus-visible": {
-        outline: "0.125rem solid #308286"
+        outline: `0.125rem solid ${vars.color.primary}`
     },
 
     background: vars.color.surface,
@@ -37,7 +37,7 @@ const toastStyles = style({
         }
     },
 
-    transition: "opacity 0.2s, transform 0.2s"
+    transition: `opacity ${vars.animation.duration.fast}, transform ${vars.animation.duration.fast}`
 });
 
 const toastContentStyles = style({
