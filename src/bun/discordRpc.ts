@@ -42,7 +42,7 @@ const destroyDiscordClient = async (client: Client): Promise<void> => {
 };
 
 const reportDiscordConnectionLost = (): void => {
-    // eslint-disable-next-line no-console
+    // oxlint-disable-next-line no-console
     console.error("Discord RPC connection lost. Retrying in the background.");
 };
 
@@ -53,7 +53,7 @@ const ignoreError = (): void => {
 const reportDiscordPresenceFailure = (error: unknown): void => {
     if (discordPresenceErrorReported) return;
     discordPresenceErrorReported = true;
-    // eslint-disable-next-line no-console
+    // oxlint-disable-next-line no-console
     console.error("Could not update Discord Rich Presence.", error);
 };
 
@@ -138,7 +138,7 @@ const markDiscordConnected = (generation: number, message: string | null): void 
     discordConnectionState = "connected";
     clearDiscordReconnectTimer();
     if (message) {
-        // eslint-disable-next-line no-console
+        // oxlint-disable-next-line no-console
         console.info(message);
     }
     queueDiscordPresence({
@@ -220,7 +220,7 @@ const handleInitialDiscordConnectionFailure = (client: Client, generation: numbe
         discordConnectionState = "unavailable";
     }
     if (isActiveGeneration(generation)) {
-        // eslint-disable-next-line no-console
+        // oxlint-disable-next-line no-console
         console.error("Could not connect to Discord Rich Presence. Skipping Discord integration.", error);
     }
     discordCleanupPromise = discordCleanupPromise.then(() => destroyDiscordClient(client)).catch(ignoreError);

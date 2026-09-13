@@ -107,7 +107,7 @@ const buildAmazonMusicAlbumUrl = (hostname: string, albumId: string, trackId: st
 const buildRegionNeutralAmazonMusicAlbumUrl = (trackId: string): { short: string; long: string } => {
     // Discord Rich Presence button URLs have a 512-character limit, so specify the top 5 regions as a fallback.
     // Additionally, since `largeImageUrl` has a 256-character limit, also create a link with a fallback only to the global and JP version
-    // eslint-disable-next-line no-magic-numbers
+    // oxlint-disable-next-line no-magic-numbers
     const fallbackUrls = AMAZON_MUSIC_REGIONAL_DATA.slice(0, 5)
         .map((data) => `&$fallback_url_${data.region}=https://music.${data.hostname}/tracks/${trackId}`)
         .join("");
