@@ -11,11 +11,13 @@ const buttonStyles = style({
         background: vars.color.primaryVariant
     },
 
+    alignItems: "center",
     background: vars.color.primary,
     borderRadius: "0.25em",
     color: vars.color.onPrimary,
     cursor: "pointer",
-    display: "block",
+    display: "flex",
+    gap: "0.5em",
     padding: "0.5em 1em"
 });
 
