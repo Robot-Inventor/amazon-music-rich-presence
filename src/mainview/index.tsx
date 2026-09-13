@@ -11,10 +11,10 @@ import { RichPresencePlayer } from "./components/RichPresencePlayer";
 import { Toast } from "@base-ui/react/toast";
 import { ToastNotifications } from "./components/ToastNotifications";
 import type { TrackInfo } from "../shared/trackInfo";
+// oxlint-disable-next-line import/max-dependencies
 import { UpdateBanner } from "./components/UpdateBanner";
 import { createRoot } from "react-dom/client";
 import { mergeClassNames } from "../utils/mergeClassNames";
-// eslint-disable-next-line import-x/max-dependencies
 import { themeClass } from "./theme.css";
 
 interface CurrentTrackState {

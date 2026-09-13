@@ -26,7 +26,7 @@ const ToastList = (): ReactNode => {
                         <Toast.Content className={toastContentStyles}>
                             <Toast.Title className={toastTitleStyles} />
                             <Toast.Description className={toastDescriptionStyles} />
-                            <Toast.Close aria-label="Dismiss" className={toastCloseStyles} render={<TextButton />}>
+                            <Toast.Close aria-label="Dismiss" className={toastCloseStyles} render=<TextButton />>
                                 Dismiss
                             </Toast.Close>
                         </Toast.Content>
