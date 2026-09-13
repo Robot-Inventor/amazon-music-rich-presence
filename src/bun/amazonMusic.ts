@@ -1,4 +1,4 @@
-/* eslint-disable max-lines */
+/* oxlint-disable max-lines */
 import { CDP_CONNECT_TIMEOUT_MS, type CdpClient, CdpDisconnectedError, createCdpClient } from "./cdp";
 import { type DebugTarget, getAmazonMusicTarget } from "./cdpTargets";
 import { getPlaybackTimestamps, resetPlaybackSyncState } from "./playback";
@@ -175,7 +175,7 @@ const updateCurrentTrack = async (client: CdpClient, generation: number): Promis
 
 const handlePollingError = (generation: number, error: unknown): void => {
     if (generation !== pollingGeneration) return;
-    // eslint-disable-next-line no-console
+    // oxlint-disable-next-line no-console
     console.error("Amazon Music polling stopped.", error);
     stopAmazonMusicPolling();
 };
@@ -235,7 +235,7 @@ const activateClient = (client: CdpClient, generation: number): boolean => {
 
 const logStartupFailure = (generation: number, message: string): void => {
     if (generation !== pollingGeneration) return;
-    // eslint-disable-next-line no-console
+    // oxlint-disable-next-line no-console
     console.error(message);
 };
 
@@ -326,7 +326,7 @@ const startAmazonMusicPolling = (
     }).catch((error: unknown) => {
         if (generation === pollingGeneration) {
             if (shouldLogStartupFailure) {
-                // eslint-disable-next-line no-console
+                // oxlint-disable-next-line no-console
                 console.error("Amazon Music polling stopped.", error);
             }
             stopAmazonMusicPolling();
