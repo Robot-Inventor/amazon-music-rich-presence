@@ -18,8 +18,8 @@
     "lint": "tsc --noEmit && knip && oxlint \"./src\"",
     "format": "prettier --write \"./src/**/*\"",
     "format:check": "prettier --check \"./src/**/*\"",
-    "build": "bun run vite build && bunx electrobun build --env=stable",
-    "dev": "concurrently \"bun run vite --port 5173\" \"bunx electrobun dev\"",
+    "build": "vite build && electrobun build --env=stable",
+    "dev": "concurrently \"vite --port 5173\" \"electrobun dev\"",
     "inspect": "bun scripts/inspect.ts",
     "ci:version": "changeset version",
     "ci:publish": "bun run build && changeset publish"
@@ -43,6 +43,7 @@
     "eslint-plugin-jsdoc": "^64.3.10",
     "knip": "^6.34.0",
     "lucide-react": "^1.41.0",
+    "oxc-transform-react": "^0.149.0",
     "oxlint": "^1.82.0",
     "oxlint-plugin-react-doctor": "^0.9.14",
     "prettier": "^3.9.6",
