@@ -1,5 +1,6 @@
 import type { LaunchAmazonMusicResult } from "../../shared/rpc";
 import type { ReactNode } from "react";
+import { SquareArrowOutUpRight } from "lucide-react";
 import { Toast } from "@base-ui/react/toast";
 import { buttonStyles } from "./LaunchAmazonMusic.css";
 import { mergeClassNames } from "../../utils/mergeClassNames";
@@ -31,7 +32,7 @@ const LaunchAmazonMusic = ({ onLaunch, className }: OpenAmazonMusicProps): React
 
     return (
         <button className={mergeClassNames(buttonStyles, className)} onClick={handleClick} type="button">
-            Launch Amazon Music
+            Launch Amazon Music <SquareArrowOutUpRight size="1em" />
         </button>
     );
 };
