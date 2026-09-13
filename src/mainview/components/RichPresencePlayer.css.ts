@@ -52,7 +52,7 @@ const artistStyles = style({
 
 const linkStyles = style({
     ":focus-visible": {
-        outline: "0.125rem solid #308286",
+        outline: `0.125rem solid ${vars.color.primary}`,
         outlineOffset: "0.125rem"
     },
 

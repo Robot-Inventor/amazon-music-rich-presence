@@ -6,6 +6,7 @@ import {
     type OpenAmazonMusicParams
 } from "../shared/rpc";
 import { BrowserView, BrowserWindow, PATHS, Tray, Updater, Utils } from "electrobun/main";
+import { getAutoUpdateEnabled, setAutoUpdateEnabled } from "./settings";
 import { buildAmazonMusicAlbumUrl } from "../utils/amazonMusicUrl";
 import { join } from "node:path";
 import { setWindowsWindowIcon } from "./windowsIcon";
@@ -102,8 +103,10 @@ const rpc = BrowserView.defineRPC<AppRPC>({
     handlers: {
         messages: {},
         requests: {
+            getAutoUpdateEnabled,
             launchAmazonMusic,
             openAmazonMusic,
+            setAutoUpdateEnabled: ({ enabled }) => setAutoUpdateEnabled(enabled),
             updateApplication
         }
     }
@@ -149,9 +152,11 @@ const checkForUpdates = async (): Promise<void> => {
     if (update.updateAvailable) win.webview.rpc?.send.updateAvailable({ version: update.version });
 };
 
-void checkForUpdates().catch(() => {
-    win.webview.rpc?.send.updateError({ message: "Could not check for updates." });
-});
+if (getAutoUpdateEnabled()) {
+    void checkForUpdates().catch(() => {
+        win.webview.rpc?.send.updateError({ message: "Could not check for updates." });
+    });
+}
 
 win.on("will-close", (event) => {
     const parsedEvent = parseWindowCloseEvent(event);

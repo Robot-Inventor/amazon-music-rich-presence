@@ -1,6 +1,34 @@
-import { createTheme } from "@vanilla-extract/css";
+import { assignVars, createGlobalTheme, createGlobalThemeContract, globalStyle } from "@vanilla-extract/css";
 
-const [themeClass, vars] = createTheme({
+const vars = createGlobalThemeContract(
+    {
+        animation: {
+            duration: {
+                fast: null
+            }
+        },
+
+        color: {
+            background: null,
+            onBackground: null,
+            onBackgroundVariant: null,
+            onPrimary: null,
+            primary: null,
+            primaryVariant: null,
+            surface: null,
+            surfaceContainer: null
+        }
+    },
+    (_value, path) => path.map((segment) => segment.toLowerCase()).join("-")
+);
+
+createGlobalTheme(":root", vars, {
+    animation: {
+        duration: {
+            fast: "0.2s"
+        }
+    },
+
     color: {
         background: "#0a0a0c",
         onBackground: "#d4d5d8",
@@ -13,4 +41,14 @@ const [themeClass, vars] = createTheme({
     }
 });
 
-export { themeClass, vars };
+globalStyle(":root", {
+    "@media": {
+        "(prefers-reduced-motion: reduce)": {
+            vars: assignVars(vars.animation.duration, {
+                fast: "0s"
+            })
+        }
+    }
+});
+
+export { vars };

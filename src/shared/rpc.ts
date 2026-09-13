@@ -51,6 +51,16 @@ interface AppRPC {
                 params: Record<string, never>;
                 response: boolean;
             };
+            getAutoUpdateEnabled: {
+                params: Record<string, never>;
+                response: boolean;
+            };
+            setAutoUpdateEnabled: {
+                params: {
+                    enabled: boolean;
+                };
+                response: boolean;
+            };
         };
         messages: Record<never, never>;
     }>;

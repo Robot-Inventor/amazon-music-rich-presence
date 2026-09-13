@@ -1,16 +1,15 @@
 import type { AppRPC, CurrentTrackUpdate, UpdateAvailable, UpdateError } from "../shared/rpc";
-import { type ReactNode, useEffect, useRef, useState, useSyncExternalStore } from "react";
+import { type ReactNode, useCallback, useEffect, useRef, useState, useSyncExternalStore } from "react";
 import { appNameStyles, bannerStyles, launcherStyles, mainStyles } from "./index.css";
 import { Electroview } from "electrobun/view";
 import { LaunchAmazonMusic } from "./components/LaunchAmazonMusic";
 import type { PlaybackTimestamps } from "../shared/playback";
 import { RichPresencePlayer } from "./components/RichPresencePlayer";
+import { SettingsButton } from "./components/SettingsButton";
 import { Toast } from "@base-ui/react/toast";
 import type { TrackInfo } from "../shared/trackInfo";
-import { UpdateBanner } from "./components/UpdateBanner";
 // oxlint-disable-next-line import/max-dependencies
-import { mergeClassNames } from "../utils/mergeClassNames";
-import { themeClass } from "./theme.css";
+import { UpdateBanner } from "./components/UpdateBanner";
 
 interface CurrentTrackState {
     readonly amazonMusicHostname: string | null;
@@ -91,6 +90,41 @@ const rpc = Electroview.defineRPC<AppRPC>({
 
 new Electroview({ rpc });
 
+interface AutoUpdateSetting {
+    readonly enabled: boolean;
+    readonly onChange: (enabled: boolean) => void;
+}
+
+const useAutoUpdateSetting = (notifyError: (description: string) => void): AutoUpdateSetting => {
+    const [enabled, setEnabled] = useState(true);
+
+    useEffect(() => {
+        void rpc.request
+            .getAutoUpdateEnabled({})
+            .then(setEnabled)
+            .catch(() => {
+                notifyError("Could not load settings.");
+            });
+    }, [notifyError]);
+
+    const onChange = (nextEnabled: boolean): void => {
+        void rpc.request
+            .setAutoUpdateEnabled({ enabled: nextEnabled })
+            .then((saved) => {
+                if (saved) {
+                    setEnabled(nextEnabled);
+                    return;
+                }
+                notifyError("Could not save settings.");
+            })
+            .catch(() => {
+                notifyError("Could not save settings.");
+            });
+    };
+
+    return { enabled, onChange };
+};
+
 // oxlint-disable-next-line max-lines-per-function
 const MainView = (): ReactNode => {
     const {
@@ -98,9 +132,22 @@ const MainView = (): ReactNode => {
         playbackTimestamps,
         trackInfo: currentTrack
     } = useSyncExternalStore(subscribeToCurrentTrack, getCurrentTrackState);
+
     const update = useSyncExternalStore(subscribeToUpdates, getUpdateState);
     const [isUpdating, setIsUpdating] = useState(false);
+
     const toastManager = Toast.useToastManager();
+
+    const notifySettingsError = useCallback(
+        (description: string): void => {
+            toastManager.add({ description, title: "Settings" });
+        },
+        [toastManager]
+    );
+
+    const { enabled: autoUpdateEnabled, onChange: handleAutoUpdateEnabledChange } =
+        useAutoUpdateSetting(notifySettingsError);
+
     const notifiedUpdateErrorRef = useRef<string | null>(null);
 
     useEffect(() => {
@@ -126,7 +173,7 @@ const MainView = (): ReactNode => {
     };
 
     return (
-        <main className={mergeClassNames(themeClass, mainStyles)}>
+        <main className={mainStyles}>
             <h1 className={appNameStyles}>Amazon Music Rich Presence</h1>
             <LaunchAmazonMusic className={launcherStyles} onLaunch={() => rpc.request.launchAmazonMusic({})} />
             <RichPresencePlayer
@@ -143,6 +190,10 @@ const MainView = (): ReactNode => {
                     version={update.version}
                 />
             )}
+            <SettingsButton
+                autoUpdateEnabled={autoUpdateEnabled}
+                onAutoUpdateEnabledChange={handleAutoUpdateEnabledChange}
+            />
         </main>
     );
 };
