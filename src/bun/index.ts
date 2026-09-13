@@ -48,6 +48,12 @@ let publishCurrentTrackToView: (update: CurrentTrackUpdate) => void = (): void =
     throw new Error("The current track publisher is not initialized.");
 };
 
+let publishUpdateErrorToView: ((message: string) => void) | null = null;
+
+const notifyUpdateFailure = (): void => {
+    publishUpdateErrorToView?.("Could not update the application.");
+};
+
 const launchAmazonMusic = (): LaunchAmazonMusicResult => {
     const executablePath = getAmazonMusicExecutablePath();
     if (!executablePath) return { message: AMAZON_MUSIC_LAUNCH_ERROR_MESSAGE, ok: false };
@@ -76,8 +82,17 @@ const updateApplication = async (): Promise<boolean> => {
         await Updater.downloadUpdate();
         if (!Updater.updateInfo().updateReady) return false;
 
-        await Updater.applyUpdate();
-        return !Updater.updateInfo().error;
+        // The update restarts the process, so let the RPC response reach the view.
+        // Otherwise, the view sees a closed RPC as a failed update even when it succeeds.
+        setTimeout(() => {
+            void Updater.applyUpdate()
+                .then(() => {
+                    if (Updater.updateInfo().error) notifyUpdateFailure();
+                })
+                .catch(notifyUpdateFailure);
+        });
+
+        return true;
     } catch {
         return false;
     }
@@ -113,6 +128,10 @@ if (!windowIconSet) {
 
 publishCurrentTrackToView = (update: CurrentTrackUpdate): void => {
     win.webview.rpc?.send.currentTrack(update);
+};
+
+publishUpdateErrorToView = (message: string): void => {
+    win.webview.rpc?.send.updateError({ message });
 };
 
 startAmazonMusicPolling(publishCurrentTrackToView, {
