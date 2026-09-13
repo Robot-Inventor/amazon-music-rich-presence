@@ -15,7 +15,7 @@
   "author": "Robot-Inventor",
   "type": "module",
   "scripts": {
-    "lint": "tsc --noEmit && knip && oxlint \"./src\"",
+    "lint": "tsc --noEmit && knip && oxlint \"./src\" \"./scripts\"",
     "format": "prettier --write \"./src/**/*\"",
     "format:check": "prettier --check \"./src/**/*\"",
     "build": "vite build && electrobun build --env=stable",
