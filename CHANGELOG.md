@@ -1,5 +1,11 @@
 # amazon-music-rich-presence
 
+## 1.3.1
+
+### Patch Changes
+
+- [#35](https://github.com/Robot-Inventor/amazon-music-rich-presence/pull/35) [`6b6e60e`](https://github.com/Robot-Inventor/amazon-music-rich-presence/commit/6b6e60e66b1a307e1afd529dd0c5ab372dcebf58) Thanks [@Robot-Inventor](https://github.com/Robot-Inventor)! - fix: fix an issue where the app would not launch
+
 ## 1.3.0
 
 ### Minor Changes
