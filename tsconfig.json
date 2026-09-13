@@ -8,7 +8,8 @@
         "ignoreDeprecations": "6.0",
         "declaration": false,
         "exactOptionalPropertyTypes": false,
-        "noImplicitReturns": false
+        "noImplicitReturns": false,
+        "baseUrl": null
     },
     "include": ["src/**/*.ts", "src/**/*.tsx", "vite.config.ts", "hutch.config.ts", "electrobun.config.ts"],
     "exclude": ["src/**/*.test.ts"]
