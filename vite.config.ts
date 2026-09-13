@@ -9,7 +9,12 @@ export default defineConfig({
         emptyOutDir: true,
         outDir: "../../dist"
     },
-    plugins: [react({ jsxImportSource: "react" }), vanillaExtractPlugin()],
+    plugins: [
+        react({
+            compiler: true
+        }),
+        vanillaExtractPlugin()
+    ],
     resolve: {
         alias: electrobunViteAliases(join(process.cwd(), ".hutch", "devkit"))
     },
