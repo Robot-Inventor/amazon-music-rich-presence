@@ -6,21 +6,11 @@ import { type } from "arktype";
 const DEFAULT_AUTO_UPDATE_ENABLED = true;
 const settingsPath = join(Utils.paths.userData, "settings.json");
 
-let autoUpdateEnabled = DEFAULT_AUTO_UPDATE_ENABLED;
-
 const parseSettings = type("string.json.parse").to({
     autoUpdateEnabled: "boolean = true"
 });
 
-const settings = parseSettings(readFileSync(settingsPath, "utf8"));
-if (!(settings instanceof type.errors)) {
-    // oxlint-disable-next-line prefer-destructuring
-    autoUpdateEnabled = settings.autoUpdateEnabled;
-}
-
-const getAutoUpdateEnabled = (): boolean => autoUpdateEnabled;
-
-const setAutoUpdateEnabled = (enabled: boolean): boolean => {
+const writeSettings = (enabled: boolean): boolean => {
     try {
         mkdirSync(Utils.paths.userData, { recursive: true });
         writeFileSync(
@@ -30,11 +20,34 @@ const setAutoUpdateEnabled = (enabled: boolean): boolean => {
             } as const satisfies typeof parseSettings.infer),
             "utf8"
         );
-        autoUpdateEnabled = enabled;
         return true;
     } catch {
         return false;
     }
+};
+
+const readSettings = (): boolean => {
+    try {
+        const settings = parseSettings(readFileSync(settingsPath, "utf8"));
+        if (!(settings instanceof type.errors)) {
+            return settings.autoUpdateEnabled;
+        }
+    } catch {
+        // Use the default when the settings file cannot be read.
+    }
+
+    writeSettings(DEFAULT_AUTO_UPDATE_ENABLED);
+    return DEFAULT_AUTO_UPDATE_ENABLED;
+};
+
+let autoUpdateEnabled = readSettings();
+
+const getAutoUpdateEnabled = (): boolean => autoUpdateEnabled;
+
+const setAutoUpdateEnabled = (enabled: boolean): boolean => {
+    if (!writeSettings(enabled)) return false;
+    autoUpdateEnabled = enabled;
+    return true;
 };
 
 export { getAutoUpdateEnabled, setAutoUpdateEnabled };
