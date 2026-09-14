@@ -43,7 +43,7 @@
     "eslint-plugin-jsdoc": "^64.3.10",
     "knip": "^6.34.0",
     "lucide-react": "^1.41.0",
-    "oxc-transform-react": "^0.149.0",
+    "oxc-transform-react": "^0.150.0",
     "oxlint": "^1.82.0",
     "oxlint-plugin-react-doctor": "^0.9.14",
     "prettier": "^3.9.6",
