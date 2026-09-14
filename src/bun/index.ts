@@ -3,7 +3,8 @@ import {
     type AppRPC,
     type CurrentTrackUpdate,
     type LaunchAmazonMusicResult,
-    type OpenAmazonMusicParams
+    type OpenAmazonMusicParams,
+    type UpdateCheckResult
 } from "../shared/rpc";
 import { BrowserView, BrowserWindow, PATHS, Tray, Updater, Utils } from "electrobun/main";
 import { getAutoUpdateEnabled, setAutoUpdateEnabled } from "./settings";
@@ -50,6 +51,9 @@ let publishCurrentTrackToView: (update: CurrentTrackUpdate) => void = (): void =
 };
 
 let publishUpdateErrorToView: ((message: string) => void) | null = null;
+let publishUpdateAvailableToView: (version: string) => void = () => {
+    throw new Error("The update publisher is not initialized.");
+};
 
 const notifyUpdateFailure = (): void => {
     publishUpdateErrorToView?.("Could not update the application.");
@@ -99,10 +103,28 @@ const updateApplication = async (): Promise<boolean> => {
     }
 };
 
+const checkForUpdates = async (): Promise<UpdateCheckResult> => {
+    try {
+        const update = await Updater.checkForUpdate();
+        if (update.error) {
+            publishUpdateErrorToView?.("Could not check for updates.");
+            return { status: "error" };
+        }
+        if (!update.updateAvailable) return { status: "not-available" };
+
+        publishUpdateAvailableToView(update.version);
+        return { status: "available", version: update.version };
+    } catch {
+        publishUpdateErrorToView?.("Could not check for updates.");
+        return { status: "error" };
+    }
+};
+
 const rpc = BrowserView.defineRPC<AppRPC>({
     handlers: {
         messages: {},
         requests: {
+            checkForUpdates,
             getAutoUpdateEnabled,
             launchAmazonMusic,
             openAmazonMusic,
@@ -137,25 +159,18 @@ publishUpdateErrorToView = (message: string): void => {
     win.webview.rpc?.send.updateError({ message });
 };
 
+publishUpdateAvailableToView = (version: string): void => {
+    win.webview.rpc?.send.updateAvailable({ version });
+};
+
 startAmazonMusicPolling(publishCurrentTrackToView, {
     shouldLogStartupFailure: false,
     startDiscordBeforeTargetSearch: false,
     targetWaitTimeoutMs: STARTUP_TARGET_WAIT_TIMEOUT_MS
 });
 
-const checkForUpdates = async (): Promise<void> => {
-    const update = await Updater.checkForUpdate();
-    if (update.error) {
-        win.webview.rpc?.send.updateError({ message: "Could not check for updates." });
-        return;
-    }
-    if (update.updateAvailable) win.webview.rpc?.send.updateAvailable({ version: update.version });
-};
-
 if (getAutoUpdateEnabled()) {
-    void checkForUpdates().catch(() => {
-        win.webview.rpc?.send.updateError({ message: "Could not check for updates." });
-    });
+    void checkForUpdates();
 }
 
 win.on("will-close", (event) => {

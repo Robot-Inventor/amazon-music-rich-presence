@@ -21,6 +21,18 @@ interface UpdateError {
     readonly message: string;
 }
 
+type UpdateCheckResult =
+    | {
+          readonly status: "available";
+          readonly version: string;
+      }
+    | {
+          readonly status: "not-available";
+      }
+    | {
+          readonly status: "error";
+      };
+
 type LaunchAmazonMusicResult =
     | {
           readonly ok: true;
@@ -50,6 +62,10 @@ interface AppRPC {
             updateApplication: {
                 params: Record<string, never>;
                 response: boolean;
+            };
+            checkForUpdates: {
+                params: Record<string, never>;
+                response: UpdateCheckResult;
             };
             getAutoUpdateEnabled: {
                 params: Record<string, never>;
@@ -83,6 +99,7 @@ export {
     type CurrentTrackUpdate,
     type LaunchAmazonMusicResult,
     type OpenAmazonMusicParams,
+    type UpdateCheckResult,
     type UpdateAvailable,
     type UpdateError
 };

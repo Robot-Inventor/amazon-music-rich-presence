@@ -1,4 +1,4 @@
-import type { AppRPC, CurrentTrackUpdate, UpdateAvailable, UpdateError } from "../shared/rpc";
+import type { AppRPC, CurrentTrackUpdate, UpdateAvailable, UpdateCheckResult, UpdateError } from "../shared/rpc";
 import { type ReactNode, useCallback, useEffect, useRef, useState, useSyncExternalStore } from "react";
 import { appNameStyles, bannerStyles, launcherStyles, mainStyles } from "./index.css";
 import { Electroview } from "electrobun/view";
@@ -89,6 +89,12 @@ const rpc = Electroview.defineRPC<AppRPC>({
 });
 
 new Electroview({ rpc });
+
+const requestUpdateCheck = (onError: () => void): Promise<UpdateCheckResult> =>
+    rpc.request.checkForUpdates({}).catch(() => {
+        onError();
+        return { status: "error" };
+    });
 
 interface AutoUpdateSetting {
     readonly enabled: boolean;
@@ -192,7 +198,14 @@ const MainView = (): ReactNode => {
             )}
             <SettingsButton
                 autoUpdateEnabled={autoUpdateEnabled}
+                isUpdating={isUpdating}
                 onAutoUpdateEnabledChange={handleAutoUpdateEnabledChange}
+                onCheckForUpdates={() =>
+                    requestUpdateCheck(() => {
+                        toastManager.add({ description: "Could not check for updates.", title: "Update" });
+                    })
+                }
+                onUpdate={handleUpdate}
             />
         </main>
     );
