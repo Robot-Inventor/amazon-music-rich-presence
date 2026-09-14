@@ -1,6 +1,10 @@
 import { keyframes, style } from "@vanilla-extract/css";
 import { vars } from "../theme.css";
 
+const updateStatusMessageStyles = style({
+    color: vars.color.onBackgroundVariant
+});
+
 const openButtonStyles = style({
     bottom: "0.5rem",
     left: "0.5rem",
@@ -59,7 +63,7 @@ const popupStyles = style({
     color: vars.color.onBackground,
     display: "flex",
     flexDirection: "column",
-    gap: "1rem",
+    gap: "1.5rem",
     maxWidth: "calc(100vw - 3rem)",
     opacity: 0,
     padding: "1rem",
@@ -99,4 +103,13 @@ const itemStyles = style({
     justifyContent: "space-between"
 });
 
-export { openButtonStyles, backdropStyles, popupStyles, headerStyles, titleStyles, viewportStyles, itemStyles };
+export {
+    updateStatusMessageStyles,
+    openButtonStyles,
+    backdropStyles,
+    popupStyles,
+    headerStyles,
+    titleStyles,
+    viewportStyles,
+    itemStyles
+};
