@@ -1,5 +1,11 @@
 # amazon-music-rich-presence
 
+## 1.4.0
+
+### Minor Changes
+
+- [#38](https://github.com/Robot-Inventor/amazon-music-rich-presence/pull/38) [`f95f057`](https://github.com/Robot-Inventor/amazon-music-rich-presence/commit/f95f05774fd8f98377837fae5ca82724c62c2096) Thanks [@Robot-Inventor](https://github.com/Robot-Inventor)! - feat: add a button to manually check for updates
+
 ## 1.3.1
 
 ### Patch Changes
