@@ -11,11 +11,39 @@ const openButtonStyles = style({
     position: "absolute"
 });
 
+const fadeInBackdrop = keyframes({
+    "0%": {
+        opacity: 0
+    },
+    "100%": {
+        opacity: 1
+    }
+});
+
+const fadeOutBackdrop = keyframes({
+    "0%": {
+        opacity: 1
+    },
+    "100%": {
+        opacity: 0
+    }
+});
+
 const backdropStyles = style({
     backdropFilter: "blur(0.5rem)",
     background: "rgba(0, 0, 0, 0.5)",
     inset: 0,
-    position: "fixed"
+    position: "fixed",
+
+    selectors: {
+        "&[data-closed]": {
+            animation: `${fadeOutBackdrop} forwards ${vars.animation.duration.fast} ease-in-out`
+        },
+
+        "&[data-open]": {
+            animation: `${fadeInBackdrop} forwards ${vars.animation.duration.fast} ease-in-out`
+        }
+    }
 });
 
 const viewportStyles = style({
@@ -86,8 +114,7 @@ const popupStyles = style({
 const headerStyles = style({
     alignItems: "center",
     display: "flex",
-    justifyContent: "space-between",
-    marginBottom: "1rem"
+    justifyContent: "space-between"
 });
 
 const titleStyles = style({
