@@ -1,5 +1,11 @@
 # amazon-music-rich-presence
 
+## 1.4.1
+
+### Patch Changes
+
+- [#40](https://github.com/Robot-Inventor/amazon-music-rich-presence/pull/40) [`df09705`](https://github.com/Robot-Inventor/amazon-music-rich-presence/commit/df09705a41c34a638afaa3335d94609527b9b8c3) Thanks [@Robot-Inventor](https://github.com/Robot-Inventor)! - feat: improve dialog styles
+
 ## 1.4.0
 
 ### Minor Changes
