@@ -1,5 +1,11 @@
 # amazon-music-rich-presence
 
+## 1.5.0
+
+### Minor Changes
+
+- [#44](https://github.com/Robot-Inventor/amazon-music-rich-presence/pull/44) [`695df0e`](https://github.com/Robot-Inventor/amazon-music-rich-presence/commit/695df0e24ec471f175a5c4e707a302f8d537a802) Thanks [@Robot-Inventor](https://github.com/Robot-Inventor)! - feat: add [Launch at startup] feature
+
 ## 1.4.1
 
 ### Patch Changes
