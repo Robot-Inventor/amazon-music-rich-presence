@@ -1,3 +1,4 @@
+import type { LaunchAtStartupStatus, UpdateCheckResult } from "../../shared/rpc";
 import { type ReactNode, useId, useState } from "react";
 import { Settings, X } from "lucide-react";
 import {
@@ -14,12 +15,14 @@ import { Dialog } from "@base-ui/react/dialog";
 import { IconButton } from "./IconButton";
 import { Switch } from "./Switch";
 import { TextButton } from "./TextButton";
-import type { UpdateCheckResult } from "../../shared/rpc";
 
 interface SettingsButtonProps {
     autoUpdateEnabled: boolean;
+    launchAtStartupStatus: LaunchAtStartupStatus;
     isUpdating: boolean;
     onAutoUpdateEnabledChange: (enabled: boolean) => void;
+    onLaunchAtStartupChange: (enabled: boolean) => void;
+    onOpen: () => void;
     onCheckForUpdates: () => Promise<UpdateCheckResult>;
     onUpdate: () => void;
 }
@@ -101,17 +104,56 @@ const UpdateCheckControl = ({
     );
 };
 
+interface LaunchAtStartupControlProps {
+    readonly onChange: (enabled: boolean) => void;
+    readonly status: LaunchAtStartupStatus;
+}
+
+const LaunchAtStartupControl = ({ onChange, status }: LaunchAtStartupControlProps): ReactNode => (
+    <label className={itemStyles}>
+        <div>
+            <div>Launch at startup</div>
+            {!status.available && (
+                <div aria-live="polite" className={updateStatusMessageStyles}>
+                    {status.message}
+                </div>
+            )}
+        </div>
+        <Switch checked={status.available && status.enabled} disabled={!status.available} onCheckedChange={onChange} />
+    </label>
+);
+
+const SettingsHeader = (): ReactNode => (
+    <div className={headerStyles}>
+        <Dialog.Title className={titleStyles}>Settings</Dialog.Title>
+        <Dialog.Close
+            render={
+                <IconButton>
+                    <X />
+                </IconButton>
+            }
+        />
+    </div>
+);
+
 const SettingsButton = ({
-    autoUpdateEnabled,
-    isUpdating,
-    onAutoUpdateEnabledChange,
     onCheckForUpdates,
+    onOpen,
+    autoUpdateEnabled,
+    onAutoUpdateEnabledChange,
+    onLaunchAtStartupChange,
+    launchAtStartupStatus,
+    isUpdating,
     onUpdate
 }: SettingsButtonProps): ReactNode => {
     const { checkForUpdates, updateCheckState } = useUpdateCheck(onCheckForUpdates);
 
     return (
-        <Dialog.Root>
+        <Dialog.Root
+            onOpenChange={(open) => {
+                if (open) onOpen();
+            }}
+        >
             <Dialog.Trigger
                 render={
                     <IconButton className={openButtonStyles}>
@@ -123,16 +165,7 @@ const SettingsButton = ({
                 <Dialog.Backdrop className={backdropStyles} />
                 <Dialog.Viewport className={viewportStyles}>
                     <Dialog.Popup className={popupStyles}>
-                        <div className={headerStyles}>
-                            <Dialog.Title className={titleStyles}>Settings</Dialog.Title>
-                            <Dialog.Close
-                                render={
-                                    <IconButton>
-                                        <X />
-                                    </IconButton>
-                                }
-                            />
-                        </div>
+                        <SettingsHeader />
                         <label className={itemStyles}>
                             Automatically check for updates
                             <Switch checked={autoUpdateEnabled} onCheckedChange={onAutoUpdateEnabledChange} />
@@ -143,6 +176,7 @@ const SettingsButton = ({
                             onUpdate={onUpdate}
                             updateCheckState={updateCheckState}
                         />
+                        <LaunchAtStartupControl onChange={onLaunchAtStartupChange} status={launchAtStartupStatus} />
                     </Dialog.Popup>
                 </Dialog.Viewport>
             </Dialog.Portal>

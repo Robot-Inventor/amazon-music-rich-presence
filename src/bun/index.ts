@@ -3,11 +3,13 @@ import {
     type AppRPC,
     type CurrentTrackUpdate,
     type LaunchAmazonMusicResult,
+    type LaunchAtStartupStatus,
     type OpenAmazonMusicParams,
     type UpdateCheckResult
 } from "../shared/rpc";
 import { BrowserView, BrowserWindow, PATHS, Tray, Updater, Utils } from "electrobun/main";
 import { getAutoUpdateEnabled, setAutoUpdateEnabled } from "./settings";
+import { getLaunchAtStartupEnabled, isLaunchAtStartupAvailable, setLaunchAtStartupEnabled } from "./startup";
 import { buildAmazonMusicAlbumUrl } from "../utils/amazonMusicUrl";
 import { join } from "node:path";
 import { setWindowsWindowIcon } from "./windowsIcon";
@@ -120,15 +122,38 @@ const checkForUpdates = async (): Promise<UpdateCheckResult> => {
     }
 };
 
+const getLaunchAtStartupStatus = async (): Promise<LaunchAtStartupStatus> => {
+    if (!isLaunchAtStartupAvailable()) {
+        return {
+            available: false,
+            message: "Launch at startup is available in installed versions only."
+        };
+    }
+
+    try {
+        return {
+            available: true,
+            enabled: await getLaunchAtStartupEnabled()
+        };
+    } catch {
+        return {
+            available: false,
+            message: "Could not read the launch at startup setting."
+        };
+    }
+};
+
 const rpc = BrowserView.defineRPC<AppRPC>({
     handlers: {
         messages: {},
         requests: {
             checkForUpdates,
             getAutoUpdateEnabled,
+            getLaunchAtStartupStatus,
             launchAmazonMusic,
             openAmazonMusic,
             setAutoUpdateEnabled: ({ enabled }) => setAutoUpdateEnabled(enabled),
+            setLaunchAtStartupEnabled: ({ enabled }) => setLaunchAtStartupEnabled(enabled),
             updateApplication
         }
     }

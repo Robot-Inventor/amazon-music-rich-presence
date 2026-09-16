@@ -1,4 +1,11 @@
-import type { AppRPC, CurrentTrackUpdate, UpdateAvailable, UpdateCheckResult, UpdateError } from "../shared/rpc";
+import type {
+    AppRPC,
+    CurrentTrackUpdate,
+    LaunchAtStartupStatus,
+    UpdateAvailable,
+    UpdateCheckResult,
+    UpdateError
+} from "../shared/rpc";
 import { type ReactNode, useCallback, useEffect, useRef, useState, useSyncExternalStore } from "react";
 import { appNameStyles, bannerStyles, launcherStyles, mainStyles } from "./index.css";
 import { Electroview } from "electrobun/view";
@@ -10,6 +17,7 @@ import { Toast } from "@base-ui/react/toast";
 import type { TrackInfo } from "../shared/trackInfo";
 // oxlint-disable-next-line import/max-dependencies
 import { UpdateBanner } from "./components/UpdateBanner";
+import { useLaunchAtStartupSetting } from "./useLaunchAtStartupSetting";
 
 interface CurrentTrackState {
     readonly amazonMusicHostname: string | null;
@@ -90,6 +98,11 @@ const rpc = Electroview.defineRPC<AppRPC>({
 
 new Electroview({ rpc });
 
+const launchAtStartupRPC = {
+    getStatus: (): Promise<LaunchAtStartupStatus> => rpc.request.getLaunchAtStartupStatus({}),
+    setEnabled: (enabled: boolean): Promise<boolean> => rpc.request.setLaunchAtStartupEnabled({ enabled })
+};
+
 const requestUpdateCheck = (onError: () => void): Promise<UpdateCheckResult> =>
     rpc.request.checkForUpdates({}).catch(() => {
         onError();
@@ -131,7 +144,7 @@ const useAutoUpdateSetting = (notifyError: (description: string) => void): AutoU
     return { enabled, onChange };
 };
 
-// oxlint-disable-next-line max-lines-per-function
+// oxlint-disable-next-line max-lines-per-function, max-statements
 const MainView = (): ReactNode => {
     const {
         amazonMusicHostname,
@@ -153,6 +166,11 @@ const MainView = (): ReactNode => {
 
     const { enabled: autoUpdateEnabled, onChange: handleAutoUpdateEnabledChange } =
         useAutoUpdateSetting(notifySettingsError);
+    const {
+        onChange: handleLaunchAtStartupChange,
+        onOpen: refreshLaunchAtStartup,
+        status: launchAtStartupStatus
+    } = useLaunchAtStartupSetting(launchAtStartupRPC, notifySettingsError);
 
     const notifiedUpdateErrorRef = useRef<string | null>(null);
 
@@ -199,7 +217,10 @@ const MainView = (): ReactNode => {
             <SettingsButton
                 autoUpdateEnabled={autoUpdateEnabled}
                 isUpdating={isUpdating}
+                launchAtStartupStatus={launchAtStartupStatus}
                 onAutoUpdateEnabledChange={handleAutoUpdateEnabledChange}
+                onLaunchAtStartupChange={handleLaunchAtStartupChange}
+                onOpen={refreshLaunchAtStartup}
                 onCheckForUpdates={() =>
                     requestUpdateCheck(() => {
                         toastManager.add({ description: "Could not check for updates.", title: "Update" });

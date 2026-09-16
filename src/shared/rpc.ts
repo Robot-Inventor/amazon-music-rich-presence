@@ -42,6 +42,16 @@ type LaunchAmazonMusicResult =
           readonly ok: false;
       };
 
+type LaunchAtStartupStatus =
+    | {
+          readonly available: true;
+          readonly enabled: boolean;
+      }
+    | {
+          readonly available: false;
+          readonly message: string;
+      };
+
 interface OpenAmazonMusicParams {
     readonly albumId: string;
     readonly amazonMusicHostname: string;
@@ -77,6 +87,16 @@ interface AppRPC {
                 };
                 response: boolean;
             };
+            getLaunchAtStartupStatus: {
+                params: Record<string, never>;
+                response: LaunchAtStartupStatus;
+            };
+            setLaunchAtStartupEnabled: {
+                params: {
+                    enabled: boolean;
+                };
+                response: boolean;
+            };
         };
         messages: Record<never, never>;
     }>;
@@ -98,6 +118,7 @@ export {
     type AppRPC,
     type CurrentTrackUpdate,
     type LaunchAmazonMusicResult,
+    type LaunchAtStartupStatus,
     type OpenAmazonMusicParams,
     type UpdateCheckResult,
     type UpdateAvailable,
