@@ -24,6 +24,11 @@ const switchStyles = style({
     width: "3rem"
 });
 
+const disabledSwitchStyles = style({
+    opacity: 0.5,
+    pointerEvents: "none"
+});
+
 const switchThumbStyles = style({
     background: vars.color.onBackground,
     borderRadius: "50%",
@@ -44,4 +49,4 @@ const switchThumbStyles = style({
     width: "1rem"
 });
 
-export { switchStyles, switchThumbStyles };
+export { switchStyles, disabledSwitchStyles, switchThumbStyles };
