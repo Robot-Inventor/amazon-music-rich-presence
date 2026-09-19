@@ -28,7 +28,7 @@
     "@base-ui/react": "^1.8.0",
     "@changesets/changelog-github": "^1.0.1",
     "@changesets/cli": "^3.0.2",
-    "@robot-inventor/oxlint-config": "^0.2.0",
+    "@robot-inventor/oxlint-config": "^0.3.0",
     "@robot-inventor/tsconfig-base": "^7.2.0",
     "@types/auto-launch": "^5.0.5",
     "@types/bun": "^1.4.1",
