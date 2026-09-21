@@ -144,7 +144,6 @@ const useAutoUpdateSetting = (notifyError: (description: string) => void): AutoU
     return { enabled, onChange };
 };
 
-// oxlint-disable-next-line max-lines-per-function, max-statements
 const MainView = (): ReactNode => {
     const {
         amazonMusicHostname,
