@@ -1,3 +1,4 @@
+import { getVisibleTrack, resetPausedPresence } from "./pausedDiscordPresence";
 import { Client } from "@xhayper/discord-rpc";
 import type { PlaybackTimestamps } from "../shared/playback";
 import type { TrackInfo } from "../shared/trackInfo";
@@ -104,6 +105,7 @@ const markPresencePublished = (client: Client, generation: number, trackInfoKey:
 interface PresenceUpdate extends PresenceData {
     readonly force?: boolean;
     readonly generation: number;
+    readonly isPlaying?: boolean;
 }
 
 const updateDiscordPresence = async ({
@@ -126,12 +128,21 @@ const updateDiscordPresence = async ({
 };
 
 const queueDiscordPresence = (presenceUpdate: PresenceUpdate): void => {
-    const { amazonMusicHostname, generation, playbackTimestamps, trackInfo } = presenceUpdate;
+    const { amazonMusicHostname, generation, isPlaying, playbackTimestamps, trackInfo } = presenceUpdate;
     if (!isActiveGeneration(generation)) return;
-    lastTrackInfo = trackInfo;
+    lastTrackInfo = getVisibleTrack(trackInfo, isPlaying, () => {
+        if (!isActiveGeneration(generation)) return;
+        lastTrackInfo = null;
+        discordUpdateQueue = discordUpdateQueue
+            .then(() => updateDiscordPresence({ ...presenceUpdate, trackInfo: null }))
+            .catch(ignoreError);
+    });
     lastAmazonMusicHostname = amazonMusicHostname;
     lastPlaybackTimestamps = playbackTimestamps;
-    discordUpdateQueue = discordUpdateQueue.then(() => updateDiscordPresence(presenceUpdate)).catch(ignoreError);
+    const currentTrackInfo = lastTrackInfo;
+    discordUpdateQueue = discordUpdateQueue
+        .then(() => updateDiscordPresence({ ...presenceUpdate, trackInfo: currentTrackInfo }))
+        .catch(ignoreError);
 };
 
 const markDiscordConnected = (generation: number, message: string | null): void => {
@@ -141,13 +152,14 @@ const markDiscordConnected = (generation: number, message: string | null): void 
         // oxlint-disable-next-line no-console
         console.info(message);
     }
-    queueDiscordPresence({
+    const presenceUpdate = {
         amazonMusicHostname: lastAmazonMusicHostname,
         force: true,
         generation,
         playbackTimestamps: lastPlaybackTimestamps,
         trackInfo: lastTrackInfo
-    });
+    };
+    discordUpdateQueue = discordUpdateQueue.then(() => updateDiscordPresence(presenceUpdate)).catch(ignoreError);
 };
 
 const scheduleDiscordReconnect = (generation: number, delay: number, reconnect: () => Promise<void>): void => {
@@ -268,6 +280,7 @@ const resetDiscordState = (): void => {
 const stopDiscordRpc = (): void => {
     activeGeneration = NO_ACTIVE_GENERATION;
     clearDiscordReconnectTimer();
+    resetPausedPresence();
 
     const client = discordClient;
     resetDiscordState();

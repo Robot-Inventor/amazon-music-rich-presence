@@ -169,7 +169,13 @@ const updateCurrentTrack = async (client: CdpClient, generation: number): Promis
 
     const { amazonMusicHostname, playback, trackInfo } = trackSnapshot;
     const playbackTimestamps = getPlaybackTimestamps(JSON.stringify(trackInfo), playback);
-    queueDiscordPresence({ amazonMusicHostname, generation, playbackTimestamps, trackInfo });
+    queueDiscordPresence({
+        amazonMusicHostname,
+        generation,
+        isPlaying: playback.isPlaying,
+        playbackTimestamps,
+        trackInfo
+    });
     publishCurrentTrackToView?.({ amazonMusicHostname, kind: "track", playbackTimestamps, trackInfo });
 };
 
