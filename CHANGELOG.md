@@ -1,5 +1,11 @@
 # amazon-music-rich-presence
 
+## 1.6.0
+
+### Minor Changes
+
+- [#52](https://github.com/Robot-Inventor/amazon-music-rich-presence/pull/52) [`186e2ae`](https://github.com/Robot-Inventor/amazon-music-rich-presence/commit/186e2ae9b10d0cd5e98b1d807a4273f9746fc77e) Thanks [@Robot-Inventor](https://github.com/Robot-Inventor)! - feat: remove Rich Presence 3 minutes after playback stops
+
 ## 1.5.0
 
 ### Minor Changes
