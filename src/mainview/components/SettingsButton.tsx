@@ -15,14 +15,12 @@ import { Dialog } from "@base-ui/react/dialog";
 import { IconButton } from "./IconButton";
 import { Switch } from "./Switch";
 import { TextButton } from "./TextButton";
+import { useAutoUpdateSetting } from "../useAutoUpdateSetting";
+import { useLaunchAtStartupSetting } from "../useLaunchAtStartupSetting";
 
 interface SettingsButtonProps {
-    autoUpdateEnabled: boolean;
-    launchAtStartupStatus: LaunchAtStartupStatus;
     isUpdating: boolean;
-    onAutoUpdateEnabledChange: (enabled: boolean) => void;
-    onLaunchAtStartupChange: (enabled: boolean) => void;
-    onOpen: () => void;
+    notifyError: (description: string) => void;
     onCheckForUpdates: () => Promise<UpdateCheckResult>;
     onUpdate: () => void;
 }
@@ -136,22 +134,19 @@ const SettingsHeader = (): ReactNode => (
     </div>
 );
 
-const SettingsButton = ({
-    onCheckForUpdates,
-    onOpen,
-    autoUpdateEnabled,
-    onAutoUpdateEnabledChange,
-    onLaunchAtStartupChange,
-    launchAtStartupStatus,
-    isUpdating,
-    onUpdate
-}: SettingsButtonProps): ReactNode => {
+const SettingsButton = ({ notifyError, onCheckForUpdates, isUpdating, onUpdate }: SettingsButtonProps): ReactNode => {
     const { checkForUpdates, updateCheckState } = useUpdateCheck(onCheckForUpdates);
+    const { enabled: autoUpdateEnabled, onChange: handleAutoUpdateEnabledChange } = useAutoUpdateSetting(notifyError);
+    const {
+        onChange: handleLaunchAtStartupChange,
+        onOpen: refreshLaunchAtStartup,
+        status: launchAtStartupStatus
+    } = useLaunchAtStartupSetting(notifyError);
 
     return (
         <Dialog.Root
             onOpenChange={(open) => {
-                if (open) onOpen();
+                if (open) refreshLaunchAtStartup();
             }}
         >
             <Dialog.Trigger
@@ -168,7 +163,7 @@ const SettingsButton = ({
                         <SettingsHeader />
                         <label className={itemStyles}>
                             Automatically check for updates
-                            <Switch checked={autoUpdateEnabled} onCheckedChange={onAutoUpdateEnabledChange} />
+                            <Switch checked={autoUpdateEnabled} onCheckedChange={handleAutoUpdateEnabledChange} />
                         </label>
                         <UpdateCheckControl
                             isUpdating={isUpdating}
@@ -176,7 +171,7 @@ const SettingsButton = ({
                             onUpdate={onUpdate}
                             updateCheckState={updateCheckState}
                         />
-                        <LaunchAtStartupControl onChange={onLaunchAtStartupChange} status={launchAtStartupStatus} />
+                        <LaunchAtStartupControl onChange={handleLaunchAtStartupChange} status={launchAtStartupStatus} />
                     </Dialog.Popup>
                 </Dialog.Viewport>
             </Dialog.Portal>

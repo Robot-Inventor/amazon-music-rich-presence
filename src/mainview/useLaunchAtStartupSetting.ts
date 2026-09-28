@@ -1,15 +1,11 @@
 import { useCallback, useEffect, useState } from "react";
 import type { LaunchAtStartupStatus } from "../shared/rpc";
+import { rpc } from "./rpc";
 
 const DEFAULT_STATUS: LaunchAtStartupStatus = {
     available: false,
     message: "Loading launch at startup setting..."
 };
-
-interface LaunchAtStartupRPC {
-    readonly getStatus: () => Promise<LaunchAtStartupStatus>;
-    readonly setEnabled: (enabled: boolean) => Promise<boolean>;
-}
 
 interface LaunchAtStartupSetting {
     readonly onChange: (enabled: boolean) => void;
@@ -17,15 +13,12 @@ interface LaunchAtStartupSetting {
     readonly status: LaunchAtStartupStatus;
 }
 
-const useLaunchAtStartupSetting = (
-    startupRPC: LaunchAtStartupRPC,
-    notifyError: (description: string) => void
-): LaunchAtStartupSetting => {
+const useLaunchAtStartupSetting = (notifyError: (description: string) => void): LaunchAtStartupSetting => {
     const [status, setStatus] = useState<LaunchAtStartupStatus>(DEFAULT_STATUS);
 
     const load = useCallback((): void => {
-        void startupRPC
-            .getStatus()
+        void rpc.request
+            .getLaunchAtStartupStatus({})
             .then(setStatus)
             .catch(() => {
                 const failedStatus: LaunchAtStartupStatus = {
@@ -35,7 +28,7 @@ const useLaunchAtStartupSetting = (
                 setStatus(failedStatus);
                 notifyError(failedStatus.message);
             });
-    }, [notifyError, startupRPC]);
+    }, [notifyError]);
 
     const refresh = useCallback((): void => {
         setStatus(DEFAULT_STATUS);
@@ -45,8 +38,8 @@ const useLaunchAtStartupSetting = (
     useEffect(load, [load]);
 
     const onChange = (enabled: boolean): void => {
-        void startupRPC
-            .setEnabled(enabled)
+        void rpc.request
+            .setLaunchAtStartupEnabled({ enabled })
             .then((saved) => {
                 if (saved) {
                     setStatus({ available: true, enabled });
