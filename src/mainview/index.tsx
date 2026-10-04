@@ -1,4 +1,3 @@
-// oxlint-disable-next-line import-x/no-unassigned-import
 import "the-new-css-reset/css/reset.css";
 
 import { MainView } from "./MainView";
