@@ -39,7 +39,7 @@
     "@vanilla-extract/vite-plugin": "^5.2.6",
     "@vitejs/plugin-react": "^6.1.1",
     "concurrently": "^10.0.5",
-    "devtools-protocol": "^0.0.1710668",
+    "devtools-protocol": "^0.0.1716261",
     "electrobun": "^2.0.1",
     "knip": "^6.38.0",
     "lucide-react": "^1.41.0",
