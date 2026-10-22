@@ -18,6 +18,7 @@ If you need support for more environments or a broader feature set, use Amazon M
 - Displays the current track information and playback position from Amazon Music as Discord Rich Presence
 - Supports the non-Microsoft Store version of the Amazon Music desktop client
 - Simple UI with a minimal feature set
+- Supports automatic startup
 - Supports minimizing to the system tray
 
 Discord Rich Presence:
