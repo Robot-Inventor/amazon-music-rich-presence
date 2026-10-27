@@ -19,7 +19,12 @@ const publishNoTrackToView = (): void => {
 
 const publishNoTrackUpdate = (generation: number): void => {
     resetPlaybackSyncState();
-    queueDiscordPresence({ amazonMusicHostname: null, generation, playbackTimestamps: null, trackInfo: null });
+    queueDiscordPresence({
+        amazonMusicHostname: null,
+        generation,
+        playbackTimestamps: null,
+        trackInfo: null
+    });
     publishNoTrackToView();
 };
 

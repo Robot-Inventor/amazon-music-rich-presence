@@ -133,7 +133,9 @@ const openAlbum = async (
 ): Promise<void> => {
     event.preventDefault();
     try {
-        if (!(await openAmazonMusic(params))) onError();
+        if (!(await openAmazonMusic(params))) {
+            onError();
+        }
     } catch {
         onError();
     }
@@ -152,7 +154,13 @@ const RichPresencePlayer = ({
             ? buildAmazonMusicAlbumUrl(amazonMusicHostname, albumId, trackId)
             : null;
     const amazonMusicParams =
-        amazonMusicHostname && albumId && trackId ? { albumId, amazonMusicHostname, trackId } : null;
+        amazonMusicHostname && albumId && trackId
+            ? {
+                  albumId,
+                  amazonMusicHostname,
+                  trackId
+              }
+            : null;
 
     const content = (
         <PlayerContent

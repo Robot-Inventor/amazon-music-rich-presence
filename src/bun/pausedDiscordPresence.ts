@@ -7,7 +7,9 @@ let expired = false;
 let pausedTrackKey: string | null = null;
 
 const resetPausedPresence = (): void => {
-    if (timer) clearTimeout(timer);
+    if (timer) {
+        clearTimeout(timer);
+    }
     timer = null;
     expired = false;
     pausedTrackKey = null;

@@ -10,7 +10,11 @@ const REGISTRY_VALUE_NOT_FOUND = 1;
 const startupLauncherPath = join(dirname(process.execPath), "launcher.exe");
 const startupAvailable = BuildConfig.getSync().isPackaged && existsSync(startupLauncherPath);
 const autoLaunch = startupAvailable
-    ? new AutoLaunch({ isHidden: false, name: STARTUP_APP_NAME, path: startupLauncherPath })
+    ? new AutoLaunch({
+          isHidden: false,
+          name: STARTUP_APP_NAME,
+          path: startupLauncherPath
+      })
     : null;
 const startupRegistry = new Winreg({
     hive: Winreg.HKCU,
@@ -44,8 +48,11 @@ const setLaunchAtStartupEnabled = async (enabled: boolean): Promise<boolean> => 
     if (!autoLaunch) return false;
 
     try {
-        if (enabled) await autoLaunch.enable();
-        else await autoLaunch.disable();
+        if (enabled) {
+            await autoLaunch.enable();
+        } else {
+            await autoLaunch.disable();
+        }
         return true;
     } catch {
         return false;

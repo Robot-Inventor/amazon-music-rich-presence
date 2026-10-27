@@ -54,7 +54,11 @@ const useLaunchAtStartupSetting = (notifyError: (description: string) => void): 
             });
     };
 
-    return { onChange, onOpen: refresh, status };
+    return {
+        onChange,
+        onOpen: refresh,
+        status
+    };
 };
 
 export { useLaunchAtStartupSetting };

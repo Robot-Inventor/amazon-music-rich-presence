@@ -56,7 +56,10 @@ const useUpdateCheck = (onCheckForUpdates: () => Promise<UpdateCheckResult>): Up
         });
     };
 
-    return { checkForUpdates, updateCheckState };
+    return {
+        checkForUpdates,
+        updateCheckState
+    };
 };
 
 const UpdateCheckControl = ({
@@ -81,9 +84,15 @@ const UpdateCheckControl = ({
     };
 
     let updateButtonLabel = "Check Now";
-    if (isChecking) updateButtonLabel = "Checking...";
-    if (updateAvailable) updateButtonLabel = "Update Now";
-    if (isUpdating) updateButtonLabel = "Updating...";
+    if (isChecking) {
+        updateButtonLabel = "Checking...";
+    }
+    if (updateAvailable) {
+        updateButtonLabel = "Update Now";
+    }
+    if (isUpdating) {
+        updateButtonLabel = "Updating...";
+    }
 
     return (
         <label className={itemStyles} htmlFor={updateButtonId}>
@@ -146,7 +155,9 @@ const SettingsButton = ({ notifyError, onCheckForUpdates, isUpdating, onUpdate }
     return (
         <Dialog.Root
             onOpenChange={(open) => {
-                if (open) refreshLaunchAtStartup();
+                if (open) {
+                    refreshLaunchAtStartup();
+                }
             }}
         >
             <Dialog.Trigger

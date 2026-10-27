@@ -11,12 +11,29 @@ const createDiscordActivity = (trackInfo: TrackInfo, playbackTimestamps: Playbac
 
     return {
         details: trackInfo.title,
-        ...(trackInfo.album ? { largeImageText: trackInfo.album } : {}),
-        ...(trackInfo.coverImage ? { largeImageKey: trackInfo.coverImage } : {}),
-        ...(trackInfo.artist ? { state: trackInfo.artist } : {}),
+        ...(trackInfo.album
+            ? {
+                  largeImageText: trackInfo.album
+              }
+            : {}),
+        ...(trackInfo.coverImage
+            ? {
+                  largeImageKey: trackInfo.coverImage
+              }
+            : {}),
+        ...(trackInfo.artist
+            ? {
+                  state: trackInfo.artist
+              }
+            : {}),
         ...(amazonMusicUrls
             ? {
-                  buttons: [{ label: DISCORD_BUTTON_LABEL, url: amazonMusicUrls.long }],
+                  buttons: [
+                      {
+                          label: DISCORD_BUTTON_LABEL,
+                          url: amazonMusicUrls.long
+                      }
+                  ],
                   largeImageUrl: amazonMusicUrls.short
               }
             : {}),

@@ -14,7 +14,9 @@ const waitForNextTargetSearch = async (retryStartedAt: number, deadline: number)
     const retryTime = Math.min(TARGET_RETRY_INTERVAL_MS, Math.max(NO_DELAY_MS, deadline - Date.now()));
     const elapsedTime = Date.now() - retryStartedAt;
     const waitTime = Math.max(NO_DELAY_MS, retryTime - elapsedTime);
-    if (waitTime > NO_DELAY_MS) await Bun.sleep(waitTime);
+    if (waitTime > NO_DELAY_MS) {
+        await Bun.sleep(waitTime);
+    }
 };
 
 const findTargetAfterLaunch = async (
@@ -42,7 +44,12 @@ const findTargetAfterLaunch = async (
     };
 
     const target = await findTarget();
-    return target ? { deadline, target } : null;
+    return target
+        ? {
+              deadline,
+              target
+          }
+        : null;
 };
 
 const waitForConnectionRetry = async (deadline: number): Promise<void> => {

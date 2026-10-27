@@ -34,17 +34,14 @@ const clearDiscordReconnectTimer = (): void => {
 
 const destroyDiscordClient = async (client: Client): Promise<void> => {
     try {
-        if (client.isConnected && client.user) await withDiscordTimeout(client.user.clearActivity());
+        if (client.isConnected && client.user) {
+            await withDiscordTimeout(client.user.clearActivity());
+        }
     } catch {
         // The connection may already be closed while stopping.
     }
 
     await withDiscordTimeout(client.destroy());
-};
-
-const reportDiscordConnectionLost = (): void => {
-    // oxlint-disable-next-line no-console
-    console.error("Discord RPC connection lost. Retrying in the background.");
 };
 
 const ignoreError = (): void => {
@@ -99,7 +96,9 @@ const sendDiscordPresence = async (client: Client, presence: PresenceData): Prom
 
 const markPresencePublished = (client: Client, generation: number, trackInfoKey: string): void => {
     discordPresenceErrorReported = false;
-    if (isActiveGeneration(generation) && discordClient === client) lastPublishedTrackKey = trackInfoKey;
+    if (isActiveGeneration(generation) && discordClient === client) {
+        lastPublishedTrackKey = trackInfoKey;
+    }
 };
 
 interface PresenceUpdate extends PresenceData {
@@ -158,7 +157,7 @@ const markDiscordConnected = (generation: number, message: string | null): void 
         generation,
         playbackTimestamps: lastPlaybackTimestamps,
         trackInfo: lastTrackInfo
-    };
+    } as const;
     discordUpdateQueue = discordUpdateQueue.then(() => updateDiscordPresence(presenceUpdate)).catch(ignoreError);
 };
 
@@ -178,7 +177,8 @@ const attachDiscordDisconnectHandler = (client: Client, generation: number, reco
 
         discordConnectionState = "reconnecting";
         discordReconnectStartedAt = Date.now();
-        reportDiscordConnectionLost();
+        // oxlint-disable-next-line no-console
+        console.error("Discord RPC connection lost. Retrying in the background.");
         scheduleDiscordReconnect(generation, DISCORD_RECONNECT_INTERVAL_MS, reconnect);
     });
 };
@@ -198,12 +198,16 @@ const createDiscordClient = (
 const replaceDiscordClient = (generation: number, reconnect: () => Promise<void>): Client => {
     const previousClient = discordClient;
     discordClient = null;
-    if (previousClient) void destroyDiscordClient(previousClient).catch(ignoreError);
+    if (previousClient) {
+        void destroyDiscordClient(previousClient).catch(ignoreError);
+    }
     return createDiscordClient(generation, "reconnecting", reconnect);
 };
 
 const handleDiscordReconnectFailure = (client: Client, generation: number, reconnect: () => Promise<void>): void => {
-    if (discordClient === client) discordClient = null;
+    if (discordClient === client) {
+        discordClient = null;
+    }
     void destroyDiscordClient(client).catch(ignoreError);
     scheduleDiscordReconnect(generation, getDiscordReconnectInterval(), reconnect);
 };
@@ -261,7 +265,9 @@ const startDiscordRpc = (generation: number): void => {
     activeGeneration = generation;
     void discordCleanupPromise
         .then(() => {
-            if (isActiveGeneration(generation)) void connectDiscordRpc(generation).catch(ignoreError);
+            if (isActiveGeneration(generation)) {
+                void connectDiscordRpc(generation).catch(ignoreError);
+            }
         })
         .catch(ignoreError);
 };
