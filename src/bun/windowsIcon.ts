@@ -35,8 +35,12 @@ const setWindowsWindowIcon = (window: Pointer, iconPath: string): boolean => {
     const bigIcon = loadIcon(iconPath, ICON_BIG_SIZE);
     const smallIcon = loadIcon(iconPath, ICON_SMALL_SIZE);
     if (!bigIcon || !smallIcon) {
-        if (bigIcon) destroyIcon(bigIcon);
-        if (smallIcon) destroyIcon(smallIcon);
+        if (bigIcon) {
+            destroyIcon(bigIcon);
+        }
+        if (smallIcon) {
+            destroyIcon(smallIcon);
+        }
         return false;
     }
 

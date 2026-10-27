@@ -51,7 +51,9 @@ const recoverCdpClient = async (
     generation: number
 ): Promise<CdpClient | null> => {
     client.close();
-    if (activeClient === client) activeClient = null;
+    if (activeClient === client) {
+        activeClient = null;
+    }
 
     const replacementTarget = await getAmazonMusicTarget({ targetId: target.id }).catch(() => null);
     if (!replacementTarget || !isActivePollingGeneration(generation)) return null;
@@ -79,7 +81,9 @@ const scheduleAfterDisconnect = async (state: PollingState, poll: PollingFunctio
     const replacementClient = await recoverCdpClient(state.client, state.target, state.generation);
 
     if (!replacementClient || !isActivePollingGeneration(state.generation)) {
-        if (isActivePollingGeneration(state.generation)) publishNoTrackUpdate(state.generation);
+        if (isActivePollingGeneration(state.generation)) {
+            publishNoTrackUpdate(state.generation);
+        }
         replacementClient?.close();
         return;
     }
@@ -131,8 +135,12 @@ const pollWithClient = (state: PollingState): void => {
 };
 
 const stopAfterStartupFailure = (generation: number, message: string, reportFailure: boolean): void => {
-    if (reportFailure) logStartupFailure(generation, message);
-    if (isActivePollingGeneration(generation)) stopAmazonMusicPolling();
+    if (reportFailure) {
+        logStartupFailure(generation, message);
+    }
+    if (isActivePollingGeneration(generation)) {
+        stopAmazonMusicPolling();
+    }
 };
 
 const connectAndPoll = async (
@@ -154,7 +162,9 @@ const connectAndPoll = async (
         return;
     }
 
-    if (!startDiscordBeforeTargetSearch) startDiscordRpc(generation);
+    if (!startDiscordBeforeTargetSearch) {
+        startDiscordRpc(generation);
+    }
     pollWithClient({
         client,
         generation,
@@ -201,7 +211,9 @@ const startAmazonMusicPolling = (
 
     const generation = advancePollingGeneration();
 
-    if (startDiscordBeforeTargetSearch) startDiscordRpc(generation);
+    if (startDiscordBeforeTargetSearch) {
+        startDiscordRpc(generation);
+    }
     void runAmazonMusicPolling({
         generation,
         shouldLogStartupFailure,

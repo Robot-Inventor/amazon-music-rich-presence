@@ -17,7 +17,15 @@ interface PendingRequest {
 class CdpDisconnectedError extends Error {}
 
 const parseCdpMessage = type("string.json.parse").to(
-    type({ id: "number", result: "unknown" }).or({ error: { message: "string" }, id: "number" })
+    type({
+        id: "number",
+        result: "unknown"
+    }).or({
+        error: {
+            message: "string"
+        },
+        id: "number"
+    })
 );
 
 const parseRuntimeEvaluateResponse = type({
@@ -48,7 +56,9 @@ const handleCdpMessage = (event: MessageEvent, pending: Map<number, PendingReque
 
 const rejectPendingRequests = (pending: Map<number, PendingRequest>): void => {
     const error = new CdpDisconnectedError("Amazon Music CDP WebSocket disconnected.");
-    for (const request of pending.values()) request.reject(error);
+    for (const request of pending.values()) {
+        request.reject(error);
+    }
     pending.clear();
 };
 
@@ -147,7 +157,7 @@ const createCdpClient = async (webSocketUrl: string, connectTimeoutMs = CDP_CONN
                 awaitPromise: true,
                 expression,
                 returnByValue: true
-            } satisfies Protocol.Runtime.EvaluateRequest;
+            } as const satisfies Protocol.Runtime.EvaluateRequest;
             const response = await call("Runtime.evaluate", params);
 
             const parsedResponse = parseRuntimeEvaluateResponse(response);

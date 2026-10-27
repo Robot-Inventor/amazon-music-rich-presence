@@ -19,7 +19,11 @@ import { type } from "arktype";
 
 const DEV_SERVER_URL = "http://localhost:5173";
 const STARTUP_TARGET_WAIT_TIMEOUT_MS = 5_000;
-const parseTrayClickedEvent = type({ data: { action: "string" } });
+const parseTrayClickedEvent = type({
+    data: {
+        action: "string"
+    }
+});
 const parseWindowCloseEvent = type({ response: "unknown" });
 
 /**
@@ -73,9 +77,14 @@ const launchAmazonMusic = (): LaunchAmazonMusicResult => {
         });
         subprocess.unref();
         startAmazonMusicPolling(publishCurrentTrackToView);
-        return { ok: true };
+        return {
+            ok: true
+        };
     } catch {
-        return { message: AMAZON_MUSIC_LAUNCH_ERROR_MESSAGE, ok: false };
+        return {
+            message: AMAZON_MUSIC_LAUNCH_ERROR_MESSAGE,
+            ok: false
+        };
     }
 };
 
@@ -94,7 +103,9 @@ const updateApplication = async (): Promise<boolean> => {
         setTimeout(() => {
             void Updater.applyUpdate()
                 .then(() => {
-                    if (Updater.updateInfo().error) notifyUpdateFailure();
+                    if (Updater.updateInfo().error) {
+                        notifyUpdateFailure();
+                    }
                 })
                 .catch(notifyUpdateFailure);
         });
@@ -110,15 +121,22 @@ const checkForUpdates = async (): Promise<UpdateCheckResult> => {
         const update = await Updater.checkForUpdate();
         if (update.error) {
             publishUpdateErrorToView?.("Could not check for updates.");
-            return { status: "error" };
+            return {
+                status: "error"
+            };
         }
         if (!update.updateAvailable) return { status: "not-available" };
 
         publishUpdateAvailableToView(update.version);
-        return { status: "available", version: update.version };
+        return {
+            status: "available",
+            version: update.version
+        };
     } catch {
         publishUpdateErrorToView?.("Could not check for updates.");
-        return { status: "error" };
+        return {
+            status: "error"
+        };
     }
 };
 
@@ -202,7 +220,9 @@ win.on("will-close", (event) => {
     const parsedEvent = parseWindowCloseEvent(event);
     if (parsedEvent instanceof type.errors) return;
 
-    parsedEvent.response = { allow: false };
+    parsedEvent.response = {
+        allow: false
+    };
     win.hide();
 });
 
@@ -225,7 +245,9 @@ tray.setMenu([
         label: "Launch Amazon Music",
         type: "normal"
     },
-    { type: "separator" },
+    {
+        type: "separator"
+    },
     {
         action: "quit",
         label: "Quit",
@@ -238,7 +260,13 @@ tray.on("tray-clicked", (event) => {
     if (parsedEvent instanceof type.errors) return;
 
     const { action } = parsedEvent.data;
-    if (action === "show-window") win.show();
-    if (action === "launch-amazon-music") launchAmazonMusic();
-    if (action === "quit") Utils.quit();
+    if (action === "show-window") {
+        win.show();
+    }
+    if (action === "launch-amazon-music") {
+        launchAmazonMusic();
+    }
+    if (action === "quit") {
+        Utils.quit();
+    }
 });

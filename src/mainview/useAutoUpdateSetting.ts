@@ -33,7 +33,10 @@ const useAutoUpdateSetting = (notifyError: (description: string) => void): AutoU
             });
     };
 
-    return { enabled, onChange };
+    return {
+        enabled,
+        onChange
+    };
 };
 
 export { useAutoUpdateSetting };

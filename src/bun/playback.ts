@@ -76,7 +76,10 @@ const parsePlaybackPositions = (playback: PlaybackSnapshot): ParsedPlaybackPosit
         return null;
     }
 
-    return { currentSeconds, remainingSeconds };
+    return {
+        currentSeconds,
+        remainingSeconds
+    };
 };
 
 const shouldRegenerateTimestamps = (trackKey: string, now: number, currentPositionMs: number): boolean => {

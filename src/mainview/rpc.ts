@@ -41,7 +41,11 @@ const createExternalStore = <T>(initialState: T): ExternalStore<T> => {
         });
     };
 
-    return { getState, setState, subscribe };
+    return {
+        getState,
+        setState,
+        subscribe
+    };
 };
 
 const currentTrackStore = createExternalStore<CurrentTrackState>({
@@ -55,7 +59,11 @@ const updateStore = createExternalStore<UpdateState>({ error: null, version: nul
 const updateCurrentTrackState = (update: CurrentTrackUpdate): void => {
     currentTrackStore.setState(
         update.kind === "no-track"
-            ? { amazonMusicHostname: null, playbackTimestamps: null, trackInfo: null }
+            ? {
+                  amazonMusicHostname: null,
+                  playbackTimestamps: null,
+                  trackInfo: null
+              }
             : {
                   amazonMusicHostname: update.amazonMusicHostname,
                   playbackTimestamps: update.playbackTimestamps,
@@ -93,7 +101,9 @@ new Electroview({ rpc });
 const requestUpdateCheck = (onError: () => void): Promise<UpdateCheckResult> =>
     rpc.request.checkForUpdates({}).catch(() => {
         onError();
-        return { status: "error" };
+        return {
+            status: "error"
+        };
     });
 
 export { requestUpdateCheck, rpc, useCurrentTrack, useUpdateState };
