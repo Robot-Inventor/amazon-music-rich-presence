@@ -1,28 +1,36 @@
 {
   "name": "amazon-music-rich-presence",
   "version": "1.6.1",
+  "private": true,
   "description": "A small tool that displays the song currently playing on Amazon Music in Discord Rich Presence.",
   "homepage": "https://github.com/Robot-Inventor/amazon-music-rich-presence#readme",
-  "private": true,
   "bugs": {
     "url": "https://github.com/Robot-Inventor/amazon-music-rich-presence/issues"
   },
+  "license": "MIT",
+  "author": "Robot-Inventor",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/Robot-Inventor/amazon-music-rich-presence.git"
   },
-  "license": "MIT",
-  "author": "Robot-Inventor",
   "type": "module",
   "scripts": {
     "lint": "tsc --noEmit && knip && oxlint \"./src\" \"./scripts\"",
-    "format": "prettier --write \"./src/**/*\"",
-    "format:check": "prettier --check \"./src/**/*\"",
+    "format": "oxfmt --write .",
+    "format:check": "oxfmt --check .",
     "build": "vite build && electrobun build --env=stable",
     "dev": "concurrently \"vite --port 5173\" \"electrobun dev\"",
     "inspect": "bun scripts/inspect.ts",
     "ci:version": "changeset version",
     "ci:publish": "bun run build && changeset publish"
+  },
+  "dependencies": {
+    "@xhayper/discord-rpc": "^1.3.4",
+    "arktype": "^2.2.3",
+    "auto-launch": "^5.0.6",
+    "react": "^19.2.8",
+    "react-dom": "^19.2.8",
+    "winreg": "^1.2.4"
   },
   "devDependencies": {
     "@base-ui/react": "^1.8.0",
@@ -44,19 +52,11 @@
     "knip": "^6.38.0",
     "lucide-react": "^1.41.0",
     "oxc-transform-react": "^0.156.0",
+    "oxfmt": "^0.75.0",
     "oxlint": "^1.82.0",
     "oxlint-plugin-react-doctor": "^0.9.14",
-    "prettier": "^3.9.6",
     "the-new-css-reset": "^1.11.3",
     "typescript": "7.0.2",
     "vite": "^8.2.2"
-  },
-  "dependencies": {
-    "@xhayper/discord-rpc": "^1.3.4",
-    "arktype": "^2.2.3",
-    "auto-launch": "^5.0.6",
-    "react": "^19.2.8",
-    "react-dom": "^19.2.8",
-    "winreg": "^1.2.4"
   }
 }
