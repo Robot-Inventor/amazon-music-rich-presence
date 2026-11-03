@@ -52,7 +52,7 @@
     "knip": "^6.38.0",
     "lucide-react": "^1.41.0",
     "oxc-transform-react": "^0.157.0",
-    "oxfmt": "^0.75.0",
+    "oxfmt": "^0.76.0",
     "oxlint": "^1.82.0",
     "oxlint-plugin-react-doctor": "^0.9.14",
     "the-new-css-reset": "^1.11.3",
