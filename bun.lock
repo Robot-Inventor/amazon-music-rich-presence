@@ -26,7 +26,7 @@
         "@vanilla-extract/vite-plugin": "^5.2.6",
         "@vitejs/plugin-react": "^6.1.1",
         "concurrently": "^10.0.5",
-        "devtools-protocol": "^0.0.1733639",
+        "devtools-protocol": "^0.0.1734725",
         "electrobun": "^2.0.1",
         "knip": "^6.38.0",
         "lucide-react": "^1.41.0",
@@ -749,7 +749,7 @@
 
     "detect-libc": ["detect-libc@2.1.2", "", {}, "sha512-Btj2BOOO83o3WyH59e8MgXsxEQVcarkUOpEYrubB0urwnN10yQ364rsiByU11nZlqWYZm05i/of7io4mzihBtQ=="],
 
-    "devtools-protocol": ["devtools-protocol@0.0.1733639", "", {}, "sha512-eUmBJoBdKzNnSRQvyGM5i5bRSTqHrjsS+oXmSLk8IHT8WcwtH5HAhJUYORa52ZiHU09eVx42sOAIxQ9KReXJTg=="],
+    "devtools-protocol": ["devtools-protocol@0.0.1734725", "", {}, "sha512-MR4wa1X950I/Xah+jSm5WyquFKm/7vWX1tzTCxqDlu2Oxb7sGHkZ3kMk/xKpCbJt1iwSvKTxwV6PSnJNw73Xqg=="],
 
     "discord-api-types": ["discord-api-types@0.38.55", "", {}, "sha512-ytuaRTzdnHUCXJ6KjL9MrItQX0xKncBKEeYI1Bst4+ud47eejH3cG6gaesYakjpPcUhh68XYS2YwGq3mmujFsA=="],
 
