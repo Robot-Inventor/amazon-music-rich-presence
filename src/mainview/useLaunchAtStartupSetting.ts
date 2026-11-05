@@ -25,6 +25,7 @@ const useLaunchAtStartupSetting = (notifyError: (description: string) => void): 
                     available: false,
                     message: "Could not read the launch at startup setting."
                 };
+
                 setStatus(failedStatus);
                 notifyError(failedStatus.message);
             });
@@ -43,8 +44,10 @@ const useLaunchAtStartupSetting = (notifyError: (description: string) => void): 
             .then((saved) => {
                 if (saved) {
                     setStatus({ available: true, enabled });
+
                     return;
                 }
+
                 notifyError("Could not save the launch at startup setting.");
                 refresh();
             })

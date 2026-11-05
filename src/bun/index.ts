@@ -24,6 +24,7 @@ const parseTrayClickedEvent = type({
         action: "string"
     }
 });
+
 const parseWindowCloseEvent = type({ response: "unknown" });
 
 /**
@@ -36,6 +37,7 @@ const getMainViewUrl = async (): Promise<string> => {
     if (channel === "dev") {
         try {
             await fetch(DEV_SERVER_URL, { method: "HEAD" });
+
             return DEV_SERVER_URL;
         } catch {
             return "views://mainview/index.html";
@@ -49,6 +51,7 @@ const url = await getMainViewUrl();
 
 const getAmazonMusicExecutablePath = (): string | null => {
     const localAppData = process.env["LOCALAPPDATA"];
+
     return localAppData ? join(localAppData, "Amazon Music", "Amazon Music.exe") : null;
 };
 
@@ -75,8 +78,10 @@ const launchAmazonMusic = (): LaunchAmazonMusicResult => {
             detached: true,
             stdio: ["ignore", "ignore", "ignore"]
         });
+
         subprocess.unref();
         startAmazonMusicPolling(publishCurrentTrackToView);
+
         return {
             ok: true
         };
@@ -90,6 +95,7 @@ const launchAmazonMusic = (): LaunchAmazonMusicResult => {
 
 const openAmazonMusic = ({ albumId, amazonMusicHostname, trackId }: OpenAmazonMusicParams): boolean => {
     const albumUrl = buildAmazonMusicAlbumUrl(amazonMusicHostname, albumId, trackId);
+
     return albumUrl ? Utils.openExternal(albumUrl) : false;
 };
 
@@ -121,19 +127,23 @@ const checkForUpdates = async (): Promise<UpdateCheckResult> => {
         const update = await Updater.checkForUpdate();
         if (update.error) {
             publishUpdateErrorToView?.("Could not check for updates.");
+
             return {
                 status: "error"
             };
         }
+
         if (!update.updateAvailable) return { status: "not-available" };
 
         publishUpdateAvailableToView(update.version);
+
         return {
             status: "available",
             version: update.version
         };
     } catch {
         publishUpdateErrorToView?.("Could not check for updates.");
+
         return {
             status: "error"
         };
@@ -223,6 +233,7 @@ win.on("will-close", (event) => {
     parsedEvent.response = {
         allow: false
     };
+
     win.hide();
 });
 
@@ -263,9 +274,11 @@ tray.on("tray-clicked", (event) => {
     if (action === "show-window") {
         win.show();
     }
+
     if (action === "launch-amazon-music") {
         launchAmazonMusic();
     }
+
     if (action === "quit") {
         Utils.quit();
     }

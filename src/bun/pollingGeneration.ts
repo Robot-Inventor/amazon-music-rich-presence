@@ -2,6 +2,7 @@ let pollingGeneration = 0;
 
 const advancePollingGeneration = (): number => {
     ++pollingGeneration;
+
     return pollingGeneration;
 };
 

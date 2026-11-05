@@ -58,6 +58,7 @@ const extractTrackInfo = async (client: CdpClient): Promise<TrackSnapshot | null
     `);
 
     const trackSnapshot = parseTrackSnapshot(value);
+
     return trackSnapshot instanceof type.errors ? null : trackSnapshot;
 };
 

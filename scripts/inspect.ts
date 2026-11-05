@@ -33,9 +33,11 @@ const getChromePath = (): string => {
         `${PROGRAMFILES ?? ""}\\Google\\Chrome\\Application\\chrome.exe`,
         `${Bun.env["PROGRAMFILES(X86)"] ?? ""}\\Google\\Chrome\\Application\\chrome.exe`,
         `${LOCALAPPDATA ?? ""}\\Google\\Chrome\\Application\\chrome.exe`
-    ];
+    ] as const;
+
     const chromePath = candidates.find((path) => path && Bun.file(path).size);
     if (!chromePath) throw new Error("Google Chrome executable was not found.");
+
     return chromePath;
 };
 
@@ -57,6 +59,7 @@ const openInChrome = async (chromePath: string, url: string): Promise<void> => {
     const subprocess = Bun.spawn(["powershell.exe", "-NoProfile", "-Command", command], {
         stdio: ["ignore", "ignore", "ignore"]
     });
+
     if (await subprocess.exited) throw new Error("Could not activate the Chrome address bar.");
 };
 

@@ -24,8 +24,10 @@ const useAutoUpdateSetting = (notifyError: (description: string) => void): AutoU
             .then((saved) => {
                 if (saved) {
                     setEnabled(nextEnabled);
+
                     return;
                 }
+
                 notifyError("Could not save settings.");
             })
             .catch(() => {

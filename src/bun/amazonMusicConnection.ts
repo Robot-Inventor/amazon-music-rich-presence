@@ -44,6 +44,7 @@ const findTargetAfterLaunch = async (
     };
 
     const target = await findTarget();
+
     return target
         ? {
               deadline,
@@ -73,6 +74,7 @@ const connectToTarget = async (
 
     if (!isActivePollingGeneration(generation) || Date.now() > deadline) {
         client.close();
+
         return null;
     }
 
@@ -96,6 +98,7 @@ const connectAfterLaunch = async (
         }).catch(() => null);
 
         if (!currentTarget) return null;
+
         await waitForConnectionRetry(deadline);
 
         return connectAfterLaunch(currentTarget, generation, deadline);

@@ -20,6 +20,7 @@ const writeSettings = (enabled: boolean): boolean => {
             } as const satisfies typeof parseSettings.infer),
             "utf8"
         );
+
         return true;
     } catch {
         return false;
@@ -37,6 +38,7 @@ const readSettings = (): boolean => {
     }
 
     writeSettings(DEFAULT_AUTO_UPDATE_ENABLED);
+
     return DEFAULT_AUTO_UPDATE_ENABLED;
 };
 
@@ -46,7 +48,9 @@ const getAutoUpdateEnabled = (): boolean => autoUpdateEnabled;
 
 const setAutoUpdateEnabled = (enabled: boolean): boolean => {
     if (!writeSettings(enabled)) return false;
+
     autoUpdateEnabled = enabled;
+
     return true;
 };
 

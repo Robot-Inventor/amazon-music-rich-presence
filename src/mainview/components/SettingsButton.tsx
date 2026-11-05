@@ -31,6 +31,7 @@ const getUpdateStatusMessage = (state: UpdateCheckState): string | null => {
     if (state.status === "available") return `Update available: ${state.version}`;
     if (state.status === "error") return "Could not check for updates.";
     if (state.status === "not-available") return "No updates available";
+
     return null;
 };
 
@@ -77,6 +78,7 @@ const UpdateCheckControl = ({
     const handleUpdateButtonClick = (): void => {
         if (updateAvailable) {
             onUpdate();
+
             return;
         }
 
@@ -87,9 +89,11 @@ const UpdateCheckControl = ({
     if (isChecking) {
         updateButtonLabel = "Checking...";
     }
+
     if (updateAvailable) {
         updateButtonLabel = "Update Now";
     }
+
     if (isUpdating) {
         updateButtonLabel = "Updating...";
     }

@@ -24,10 +24,12 @@ const user32 = dlopen("user32.dll", {
         returns: FFIType.i64
     }
 });
+
 const { DestroyIcon: destroyIcon, LoadImageW: loadImage, SendMessageW: sendMessage } = user32.symbols;
 
 const loadIcon = (iconPath: string, size: number): Pointer | bigint | null => {
     const wideIconPath = Buffer.from(`${iconPath}\0`, "utf16le");
+
     return loadImage(null, ptr(wideIconPath), IMAGE_ICON, size, size, LR_LOADFROMFILE);
 };
 
@@ -38,9 +40,11 @@ const setWindowsWindowIcon = (window: Pointer, iconPath: string): boolean => {
         if (bigIcon) {
             destroyIcon(bigIcon);
         }
+
         if (smallIcon) {
             destroyIcon(smallIcon);
         }
+
         return false;
     }
 

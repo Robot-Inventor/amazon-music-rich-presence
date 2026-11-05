@@ -15,7 +15,7 @@
   },
   "type": "module",
   "scripts": {
-    "lint": "tsc --noEmit && knip && oxlint \"./src\" \"./scripts\"",
+    "lint": "tsc --noEmit && knip && oxlint src scripts",
     "format": "oxfmt --write .",
     "format:check": "oxfmt --check .",
     "build": "vite build && electrobun build --env=stable",

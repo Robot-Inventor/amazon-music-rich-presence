@@ -1,11 +1,11 @@
 import { defineConfig } from "oxlint";
-import { oxlintReactConfigNoJSDoc } from "@robot-inventor/oxlint-config";
+import { oxlintReactConfig } from "@robot-inventor/oxlint-config";
 
 export default defineConfig({
-    ...oxlintReactConfigNoJSDoc,
+    ...oxlintReactConfig,
     ignorePatterns: [".hutch/**"],
     settings: {
-        ...oxlintReactConfigNoJSDoc.settings,
+        ...oxlintReactConfig.settings,
         "import-x/resolver": {
             node: true,
             typescript: {
