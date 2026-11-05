@@ -1,3 +1,5 @@
+import type { Client } from "@xhayper/discord-rpc";
+
 const DISCORD_REQUEST_TIMEOUT_MS = 5_000;
 
 const toError = (error: unknown): Error => (error instanceof Error ? error : new Error(String(error)));
@@ -20,4 +22,26 @@ const withDiscordTimeout = <T>(request: Promise<T>): Promise<T> =>
         );
     });
 
-export { withDiscordTimeout };
+const destroyDiscordClient = async (client: Client): Promise<void> => {
+    try {
+        if (client.isConnected && client.user) {
+            await withDiscordTimeout(client.user.clearActivity());
+        }
+    } catch {
+        // The connection may already be closed while stopping.
+    }
+
+    await withDiscordTimeout(client.destroy());
+};
+
+const reconnectDiscordClient = async (client: Client): Promise<boolean> => {
+    try {
+        await withDiscordTimeout(client.login());
+
+        return client.isConnected;
+    } catch {
+        return false;
+    }
+};
+
+export { destroyDiscordClient, reconnectDiscordClient, withDiscordTimeout };

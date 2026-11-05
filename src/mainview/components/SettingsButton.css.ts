@@ -83,6 +83,7 @@ const popupClose = keyframes({
         transform: "scale(0.9)"
     }
 });
+
 /* oxlint-enable sort-keys */
 
 const popupStyles = style({

@@ -75,12 +75,14 @@ const PlaybackProgress = ({ playbackTimestamps }: PlaybackProgressProps): ReactN
               (playbackTimestamps.endTimestamp - playbackTimestamps.startTimestamp) / MILLISECONDS_PER_SECOND
           )
         : NO_SECONDS;
+
     const currentSeconds = playbackTimestamps
         ? Math.min(
               durationSeconds,
               Math.max(NO_SECONDS, (now - playbackTimestamps.startTimestamp) / MILLISECONDS_PER_SECOND)
           )
         : NO_SECONDS;
+
     const progressMax = durationSeconds > NO_SECONDS ? durationSeconds : PROGRESS_FALLBACK_MAX;
 
     return (
@@ -149,18 +151,18 @@ const RichPresencePlayer = ({
 }: RichPresencePlayerProps): ReactNode => {
     const { album, artist, coverImage, title, albumId, trackId } = trackInfo ?? {};
 
-    const amazonMusicUrl =
-        amazonMusicHostname && albumId && trackId
-            ? buildAmazonMusicAlbumUrl(amazonMusicHostname, albumId, trackId)
-            : null;
-    const amazonMusicParams =
-        amazonMusicHostname && albumId && trackId
-            ? {
-                  albumId,
-                  amazonMusicHostname,
-                  trackId
-              }
-            : null;
+    const hasAmazonMusicParams = amazonMusicHostname && albumId && trackId;
+    const amazonMusicUrl = hasAmazonMusicParams
+        ? buildAmazonMusicAlbumUrl(amazonMusicHostname, albumId, trackId)
+        : null;
+
+    const amazonMusicParams = hasAmazonMusicParams
+        ? {
+              albumId,
+              amazonMusicHostname,
+              trackId
+          }
+        : null;
 
     const content = (
         <PlayerContent

@@ -16,6 +16,7 @@ const autoLaunch = startupAvailable
           path: startupLauncherPath
       })
     : null;
+
 const startupRegistry = new Winreg({
     hive: Winreg.HKCU,
     key: "\\Software\\Microsoft\\Windows\\CurrentVersion\\Run"
@@ -29,18 +30,23 @@ const readLaunchAtStartup = (): Promise<boolean> =>
         startupRegistry.get(STARTUP_REGISTRY_VALUE_NAME, (error: Error | null, item: unknown) => {
             if (!error) {
                 resolve(Boolean(item));
+
                 return;
             }
+
             if (isMissingRegistryValueError(error)) {
                 resolve(false);
+
                 return;
             }
+
             reject(error);
         });
     });
 
 const getLaunchAtStartupEnabled = async (): Promise<boolean> => {
     if (!autoLaunch) throw new Error("Launch at startup is unavailable.");
+
     return readLaunchAtStartup();
 };
 
@@ -53,6 +59,7 @@ const setLaunchAtStartupEnabled = async (enabled: boolean): Promise<boolean> => 
         } else {
             await autoLaunch.disable();
         }
+
         return true;
     } catch {
         return false;

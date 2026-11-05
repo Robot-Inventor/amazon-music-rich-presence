@@ -25,6 +25,7 @@ const publishNoTrackUpdate = (generation: number): void => {
         playbackTimestamps: null,
         trackInfo: null
     });
+
     publishNoTrackToView();
 };
 
@@ -34,6 +35,7 @@ const updateCurrentTrack = async (client: CdpClient, generation: number): Promis
 
     if (!trackSnapshot) {
         publishNoTrackUpdate(generation);
+
         return;
     }
 
@@ -46,6 +48,7 @@ const updateCurrentTrack = async (client: CdpClient, generation: number): Promis
         playbackTimestamps,
         trackInfo
     });
+
     publishCurrentTrackToView?.({ amazonMusicHostname, kind: "track", playbackTimestamps, trackInfo });
 };
 

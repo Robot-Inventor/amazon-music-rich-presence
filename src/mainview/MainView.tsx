@@ -25,6 +25,7 @@ const MainView = (): ReactNode => {
 
     useEffect(() => {
         if (!update.error || update.error === notifiedUpdateErrorRef.current) return;
+
         notifiedUpdateErrorRef.current = update.error;
         toastManager.add({ description: update.error, title: "Update" });
     }, [toastManager, update.error]);

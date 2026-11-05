@@ -10,6 +10,7 @@ const resetPausedPresence = (): void => {
     if (timer) {
         clearTimeout(timer);
     }
+
     timer = null;
     expired = false;
     pausedTrackKey = null;
@@ -22,6 +23,7 @@ const getVisibleTrack = (
 ): TrackInfo | null => {
     if (!trackInfo || isPlaying) {
         resetPausedPresence();
+
         return trackInfo;
     }
 
@@ -30,6 +32,7 @@ const getVisibleTrack = (
         resetPausedPresence();
         pausedTrackKey = trackKey;
     }
+
     if (!timer && !expired) {
         timer = setTimeout(() => {
             timer = null;
@@ -37,6 +40,7 @@ const getVisibleTrack = (
             onExpire();
         }, PAUSED_PRESENCE_TIMEOUT_MS);
     }
+
     return expired ? null : trackInfo;
 };
 

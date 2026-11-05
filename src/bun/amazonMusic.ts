@@ -63,6 +63,7 @@ const recoverCdpClient = async (
 
 const handlePollingError = (generation: number, error: unknown): void => {
     if (!isActivePollingGeneration(generation)) return;
+
     // oxlint-disable-next-line no-console
     console.error("Amazon Music polling stopped.", error);
     stopAmazonMusicPolling();
@@ -84,7 +85,9 @@ const scheduleAfterDisconnect = async (state: PollingState, poll: PollingFunctio
         if (isActivePollingGeneration(state.generation)) {
             publishNoTrackUpdate(state.generation);
         }
+
         replacementClient?.close();
+
         return;
     }
 
@@ -107,7 +110,9 @@ const pollAmazonMusic = async ({ client, generation, nextPollAt, target }: Polli
         await updateCurrentTrack(client, generation);
     } catch (error: unknown) {
         if (!(error instanceof CdpDisconnectedError)) throw error;
+
         await scheduleAfterDisconnect({ client, generation, nextPollAt, target }, pollAmazonMusic);
+
         return;
     }
 
@@ -117,20 +122,25 @@ const pollAmazonMusic = async ({ client, generation, nextPollAt, target }: Polli
 const activateClient = (client: CdpClient, generation: number): boolean => {
     if (!isActivePollingGeneration(generation)) {
         client.close();
+
         return false;
     }
+
     activeClient = client;
+
     return true;
 };
 
 const logStartupFailure = (generation: number, message: string): void => {
     if (!isActivePollingGeneration(generation)) return;
+
     // oxlint-disable-next-line no-console
     console.error(message);
 };
 
 const pollWithClient = (state: PollingState): void => {
     if (!activateClient(state.client, state.generation)) return;
+
     schedulePoll(state, pollAmazonMusic);
 };
 
@@ -138,6 +148,7 @@ const stopAfterStartupFailure = (generation: number, message: string, reportFail
     if (reportFailure) {
         logStartupFailure(generation, message);
     }
+
     if (isActivePollingGeneration(generation)) {
         stopAmazonMusicPolling();
     }
@@ -154,17 +165,20 @@ const connectAndPoll = async (
             `Could not connect to the Amazon Music page within ${String(targetWaitTimeoutMs / MILLISECONDS_PER_SECOND)} seconds.`,
             shouldLogStartupFailure
         );
+
         return;
     }
 
     if (!isActivePollingGeneration(generation)) {
         client.close();
+
         return;
     }
 
     if (!startDiscordBeforeTargetSearch) {
         startDiscordRpc(generation);
     }
+
     pollWithClient({
         client,
         generation,
@@ -186,8 +200,10 @@ const runAmazonMusicPolling = async ({
             `Could not find the Amazon Music page target within ${String(targetWaitTimeoutMs / MILLISECONDS_PER_SECOND)} seconds.`,
             shouldLogStartupFailure
         );
+
         return;
     }
+
     if (!isActivePollingGeneration(generation)) return;
 
     await connectAndPoll(searchResult, {
@@ -214,6 +230,7 @@ const startAmazonMusicPolling = (
     if (startDiscordBeforeTargetSearch) {
         startDiscordRpc(generation);
     }
+
     void runAmazonMusicPolling({
         generation,
         shouldLogStartupFailure,
@@ -225,6 +242,7 @@ const startAmazonMusicPolling = (
                 // oxlint-disable-next-line no-console
                 console.error("Amazon Music polling stopped.", error);
             }
+
             stopAmazonMusicPolling();
         }
     });

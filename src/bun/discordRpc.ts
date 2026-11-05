@@ -1,9 +1,9 @@
+import { destroyDiscordClient, reconnectDiscordClient, withDiscordTimeout } from "./discordRpcUtils";
 import { getVisibleTrack, resetPausedPresence } from "./pausedDiscordPresence";
 import { Client } from "@xhayper/discord-rpc";
 import type { PlaybackTimestamps } from "../shared/playback";
 import type { TrackInfo } from "../shared/trackInfo";
 import { createDiscordActivity } from "./discordActivity";
-import { withDiscordTimeout } from "./discordRpcUtils";
 
 const DISCORD_RECONNECT_INTERVAL_MS = 5_000;
 const DISCORD_RECONNECT_GRACE_PERIOD_MS = 60_000;
@@ -28,20 +28,9 @@ let discordPresenceErrorReported = false;
 
 const clearDiscordReconnectTimer = (): void => {
     if (!discordReconnectTimer) return;
+
     clearTimeout(discordReconnectTimer);
     discordReconnectTimer = null;
-};
-
-const destroyDiscordClient = async (client: Client): Promise<void> => {
-    try {
-        if (client.isConnected && client.user) {
-            await withDiscordTimeout(client.user.clearActivity());
-        }
-    } catch {
-        // The connection may already be closed while stopping.
-    }
-
-    await withDiscordTimeout(client.destroy());
 };
 
 const ignoreError = (): void => {
@@ -50,6 +39,7 @@ const ignoreError = (): void => {
 
 const reportDiscordPresenceFailure = (error: unknown): void => {
     if (discordPresenceErrorReported) return;
+
     discordPresenceErrorReported = true;
     // oxlint-disable-next-line no-console
     console.error("Could not update Discord Rich Presence.", error);
@@ -61,15 +51,6 @@ const getDiscordReconnectInterval = (): number =>
         : DISCORD_LONG_RECONNECT_INTERVAL_MS;
 
 const isActiveGeneration = (generation: number): boolean => generation === activeGeneration;
-
-const reconnectDiscordClient = async (client: Client): Promise<boolean> => {
-    try {
-        await withDiscordTimeout(client.login());
-        return client.isConnected;
-    } catch {
-        return false;
-    }
-};
 
 interface PresenceData {
     readonly amazonMusicHostname: string | null;
@@ -87,9 +68,11 @@ const sendDiscordPresence = async (client: Client, presence: PresenceData): Prom
         } else {
             await withDiscordTimeout(client.user.clearActivity());
         }
+
         return true;
     } catch (error: unknown) {
         reportDiscordPresenceFailure(error);
+
         return false;
     }
 };
@@ -115,6 +98,7 @@ const updateDiscordPresence = async ({
     trackInfo
 }: PresenceUpdate): Promise<void> => {
     if (!isActiveGeneration(generation)) return;
+
     const trackInfoKey = JSON.stringify({ amazonMusicHostname, playbackTimestamps, trackInfo });
     if (!force && trackInfoKey === lastPublishedTrackKey) return;
 
@@ -129,13 +113,16 @@ const updateDiscordPresence = async ({
 const queueDiscordPresence = (presenceUpdate: PresenceUpdate): void => {
     const { amazonMusicHostname, generation, isPlaying, playbackTimestamps, trackInfo } = presenceUpdate;
     if (!isActiveGeneration(generation)) return;
+
     lastTrackInfo = getVisibleTrack(trackInfo, isPlaying, () => {
         if (!isActiveGeneration(generation)) return;
+
         lastTrackInfo = null;
         discordUpdateQueue = discordUpdateQueue
             .then(() => updateDiscordPresence({ ...presenceUpdate, trackInfo: null }))
             .catch(ignoreError);
     });
+
     lastAmazonMusicHostname = amazonMusicHostname;
     lastPlaybackTimestamps = playbackTimestamps;
     const currentTrackInfo = lastTrackInfo;
@@ -151,6 +138,7 @@ const markDiscordConnected = (generation: number, message: string | null): void 
         // oxlint-disable-next-line no-console
         console.info(message);
     }
+
     const presenceUpdate = {
         amazonMusicHostname: lastAmazonMusicHostname,
         force: true,
@@ -158,11 +146,15 @@ const markDiscordConnected = (generation: number, message: string | null): void 
         playbackTimestamps: lastPlaybackTimestamps,
         trackInfo: lastTrackInfo
     } as const;
+
     discordUpdateQueue = discordUpdateQueue.then(() => updateDiscordPresence(presenceUpdate)).catch(ignoreError);
 };
 
 const scheduleDiscordReconnect = (generation: number, delay: number, reconnect: () => Promise<void>): void => {
-    if (!isActiveGeneration(generation) || discordConnectionState !== "reconnecting" || discordReconnectTimer) return;
+    const shouldSkipReconnect =
+        !isActiveGeneration(generation) || discordConnectionState !== "reconnecting" || discordReconnectTimer;
+
+    if (shouldSkipReconnect) return;
 
     discordReconnectTimer = setTimeout(() => {
         discordReconnectTimer = null;
@@ -192,6 +184,7 @@ const createDiscordClient = (
     discordClient = client;
     discordConnectionState = connectionState;
     attachDiscordDisconnectHandler(client, generation, reconnect);
+
     return client;
 };
 
@@ -201,6 +194,7 @@ const replaceDiscordClient = (generation: number, reconnect: () => Promise<void>
     if (previousClient) {
         void destroyDiscordClient(previousClient).catch(ignoreError);
     }
+
     return createDiscordClient(generation, "reconnecting", reconnect);
 };
 
@@ -208,6 +202,7 @@ const handleDiscordReconnectFailure = (client: Client, generation: number, recon
     if (discordClient === client) {
         discordClient = null;
     }
+
     void destroyDiscordClient(client).catch(ignoreError);
     scheduleDiscordReconnect(generation, getDiscordReconnectInterval(), reconnect);
 };
@@ -219,11 +214,13 @@ const attemptDiscordReconnect = async (generation: number): Promise<void> => {
 
     if (!(await reconnectDiscordClient(client))) {
         handleDiscordReconnectFailure(client, generation, () => attemptDiscordReconnect(generation));
+
         return;
     }
 
     if (!isActiveGeneration(generation) || discordClient !== client) {
         await destroyDiscordClient(client).catch(ignoreError);
+
         return;
     }
 
@@ -235,10 +232,12 @@ const handleInitialDiscordConnectionFailure = (client: Client, generation: numbe
         discordClient = null;
         discordConnectionState = "unavailable";
     }
+
     if (isActiveGeneration(generation)) {
         // oxlint-disable-next-line no-console
         console.error("Could not connect to Discord Rich Presence. Skipping Discord integration.", error);
     }
+
     discordCleanupPromise = discordCleanupPromise.then(() => destroyDiscordClient(client)).catch(ignoreError);
 };
 
@@ -250,11 +249,13 @@ const connectDiscordRpc = async (generation: number): Promise<void> => {
         if (!client.isConnected) throw new Error("Discord RPC disconnected during connection.");
     } catch (error: unknown) {
         handleInitialDiscordConnectionFailure(client, generation, error);
+
         return;
     }
 
     if (!isActiveGeneration(generation) || discordClient !== client) {
         await destroyDiscordClient(client).catch(ignoreError);
+
         return;
     }
 

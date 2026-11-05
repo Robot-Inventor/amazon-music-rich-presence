@@ -100,7 +100,9 @@ const isAmazonMusicWebAppUrl = (value: string): boolean => parseAmazonMusicWebAp
 
 const buildAmazonMusicAlbumUrl = (hostname: string, albumId: string, trackId: string): string | null => {
     if (!isAmazonMusicHostname(hostname)) return null;
+
     const musicHostname = hostname.startsWith("music.") ? hostname : `music.${hostname.replace(/^www\./u, "")}`;
+
     return `https://${musicHostname}/albums/${albumId}?trackAsin=${trackId}`;
 };
 
@@ -111,6 +113,7 @@ const buildRegionNeutralAmazonMusicAlbumUrl = (trackId: string): { short: string
     const fallbackUrls = AMAZON_MUSIC_REGIONAL_DATA.slice(0, 5)
         .map((data) => `&$fallback_url_${data.region}=https://music.${data.hostname}/tracks/${trackId}`)
         .join("");
+
     return {
         long: `https://am.app.link/?$deeplink_path=tracks/${trackId}&$fallback_url=https://music.amazon.com/tracks/${trackId}${fallbackUrls}`,
         short: `https://am.app.link/?$deeplink_path=tracks/${trackId}&$fallback_url=https://music.amazon.com/tracks/${trackId}&$fallback_url_jp=https://music.amazon.co.jp/tracks/${trackId}`

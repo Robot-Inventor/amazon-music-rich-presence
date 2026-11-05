@@ -44,10 +44,12 @@ const handleCdpMessage = (event: MessageEvent, pending: Map<number, PendingReque
 
     const request = pending.get(message.id);
     if (!request) return;
+
     pending.delete(message.id);
 
     if ("error" in message) {
         request.reject(new Error(message.error.message));
+
         return;
     }
 
@@ -59,6 +61,7 @@ const rejectPendingRequests = (pending: Map<number, PendingRequest>): void => {
     for (const request of pending.values()) {
         request.reject(error);
     }
+
     pending.clear();
 };
 
@@ -137,6 +140,7 @@ const createCdpClient = async (webSocketUrl: string, connectTimeoutMs = CDP_CONN
 
     const close = (): void => {
         if (isClosed) return;
+
         isClosed = true;
         rejectPendingRequests(pending);
         socket.close();
@@ -147,6 +151,7 @@ const createCdpClient = async (webSocketUrl: string, connectTimeoutMs = CDP_CONN
     socket.addEventListener("message", (event) => {
         handleCdpMessage(event, pending);
     });
+
     socket.addEventListener("error", close);
     socket.addEventListener("close", close);
 
@@ -158,6 +163,7 @@ const createCdpClient = async (webSocketUrl: string, connectTimeoutMs = CDP_CONN
                 expression,
                 returnByValue: true
             } as const satisfies Protocol.Runtime.EvaluateRequest;
+
             const response = await call("Runtime.evaluate", params);
 
             const parsedResponse = parseRuntimeEvaluateResponse(response);

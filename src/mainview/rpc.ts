@@ -27,6 +27,7 @@ const createExternalStore = <T>(initialState: T): ExternalStore<T> => {
 
     const subscribe = (subscriber: () => void): (() => void) => {
         subscribers.add(subscriber);
+
         return (): void => {
             subscribers.delete(subscriber);
         };
@@ -101,6 +102,7 @@ new Electroview({ rpc });
 const requestUpdateCheck = (onError: () => void): Promise<UpdateCheckResult> =>
     rpc.request.checkForUpdates({}).catch(() => {
         onError();
+
         return {
             status: "error"
         };

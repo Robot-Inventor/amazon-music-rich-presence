@@ -37,6 +37,7 @@ let playbackSyncState: PlaybackSyncState | null = null;
 
 const getPlaybackSeconds = ({ first, hasHours, second, third }: PlaybackParts): number => {
     if (hasHours) return first * MINUTES_PER_HOUR * SECONDS_PER_MINUTE + second * SECONDS_PER_MINUTE + third;
+
     return first * SECONDS_PER_MINUTE + second;
 };
 
@@ -53,6 +54,7 @@ const parsePlaybackPosition = (value: string, requireNegative: boolean): number 
         second: Number(second),
         third: third ? Number(third) : NO_SECONDS
     });
+
     const signedSeconds = sign ? -seconds : seconds;
 
     return Number.isSafeInteger(seconds) ? signedSeconds : null;
@@ -67,12 +69,14 @@ const parsePlaybackPositions = (playback: PlaybackSnapshot): ParsedPlaybackPosit
     const remainingSeconds = parsePlaybackPosition(playback.currentRemainingPosition ?? "", true);
     if (currentSeconds === null || remainingSeconds === null) {
         resetPlaybackSyncState();
+
         return null;
     }
 
     const durationSeconds = currentSeconds - remainingSeconds;
     if (durationSeconds <= NO_SECONDS || currentSeconds > durationSeconds) {
         resetPlaybackSyncState();
+
         return null;
     }
 
@@ -84,6 +88,7 @@ const parsePlaybackPositions = (playback: PlaybackSnapshot): ParsedPlaybackPosit
 
 const shouldRegenerateTimestamps = (trackKey: string, now: number, currentPositionMs: number): boolean => {
     if (!playbackSyncState) return true;
+
     return (
         playbackSyncState.trackKey !== trackKey ||
         Math.abs(now - playbackSyncState.startTimestamp - currentPositionMs) >= PLAYBACK_SYNC_TOLERANCE_MS
@@ -93,6 +98,7 @@ const shouldRegenerateTimestamps = (trackKey: string, now: number, currentPositi
 const getPlaybackTimestamps = (trackKey: string, playback: PlaybackSnapshot): PlaybackTimestamps | null => {
     if (!playback.isPlaying) {
         resetPlaybackSyncState();
+
         return null;
     }
 
